@@ -1,0 +1,56 @@
+---
+import Base from '../layouts/Base.astro';
+import Intro from '../components/Intro.astro';
+import CarteActualite from '../components/CarteActualite.astro';
+import LigneEvenement from '../components/LigneEvenement.astro';
+import Logo from '../components/Logo.astro';
+import { UI, route } from '../lib/i18n.js';
+import { contenus, url } from '../lib/content.js';
+
+interface Props { lang: 'fr' | 'en'; cle: string; slug?: string }
+const { lang, cle } = Astro.props;
+const t = UI[lang];
+const c = await contenus();
+const alterne = url(route(cle, lang === 'fr' ? 'en' : 'fr'));
+const intro = lang === 'fr'
+  ? "Parutions, rencontres, restitutions et temps forts de la vie de l’institut, ainsi que l’agenda de ses prochains rendez-vous."
+  : "New publications, meetings, presentations of findings and highlights of the Institute’s life, together with its upcoming events.";
+---
+<Base lang={lang} cle={cle} alterne={alterne} titre={t.nav.actualites} description={intro}>
+  <Intro
+    surtitre={lang === 'fr' ? "La vie de l’institut" : 'Institute life'}
+    titre={lang === 'fr' ? 'Actualités et agenda' : 'News and events'}
+    texte={intro}
+    fil={[{ libelle: t.nav.accueil, lien: url(route('accueil', lang)) }, { libelle: t.nav.actualites }]}
+  />
+  <section class="section">
+    <div class="conteneur colonnes">
+      <div class="pile" style="gap:28px">
+        <h2 style="font-size:clamp(1.5rem,1.25rem + 1vw,2rem)">{t.actualites}</h2>
+        {c.actualites.length > 0 ? (
+          <div class="pile" style="gap:36px">
+            {c.actualites.map((a) => <CarteActualite a={a} lang={lang} />)}
+          </div>
+        ) : (
+          <p class="vide">{t.aucuneActualite}</p>
+        )}
+      </div>
+      <aside class="colonne-collante" id="agenda">
+        <div class="pile" style="gap:8px">
+          <h2 style="font-size:clamp(1.5rem,1.25rem + 1vw,2rem)">{t.agenda}</h2>
+          {c.aVenir.length > 0 ? (
+            <ul class="agenda">{c.aVenir.map((e) => <LigneEvenement e={e} lang={lang} />)}</ul>
+          ) : (
+            <div class="vide" style="margin-top:16px"><Logo symboleSeul /><p style="font-size:1rem">{t.aucunEvenement}</p></div>
+          )}
+          {c.passes.length > 0 && (
+            <>
+              <h3 class="surtitre" style="font-family:var(--f-ui);font-size:var(--t-xs);margin-top:32px">{t.passes}</h3>
+              <ul class="agenda">{c.passes.slice(0, 8).map((e) => <LigneEvenement e={e} lang={lang} />)}</ul>
+            </>
+          )}
+        </div>
+      </aside>
+    </div>
+  </section>
+</Base>

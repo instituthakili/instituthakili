@@ -1,0 +1,48 @@
+{
+  "intro_titre": "Un institut de recherche au service de la redevabilité",
+  "intro_titre_en": "A research institute for accountability",
+  "intro_texte": "Établi à Bamako, l'Institut HAKILI pour la Gouvernance et la Redevabilité en Afrique (IHGR) conduit des travaux de recherche, de mesure et de publication sur la manière dont les règles de la gouvernance publique sont conçues, appliquées et contrôlées, au Mali comme dans le reste du continent.",
+  "intro_texte_en": "Based in Bamako, the HAKILI Institute for Governance and Accountability in Africa (IHGR) carries out research, measurement and publication work on how the rules of public governance are designed, applied and monitored, in Mali and across the continent.",
+  "mission_titre": "Mission",
+  "mission_titre_en": "Mission",
+  "mission": "L'institut s'est donné pour mission de produire et de rendre accessibles les connaissances qui permettent de juger l'action publique sur pièces. En effet, la redevabilité ne se décrète pas. Elle suppose que la règle soit connue, que son application soit observée et que l'écart entre les deux soit mesuré, puis porté à la connaissance de ceux qui ont vocation à en demander compte, qu'il s'agisse des citoyens, des parlements, des juridictions ou des partenaires de l'État.\n\nSi les textes adoptés ces dernières années, au Mali comme dans la sous-région, consacrent théoriquement des obligations de transparence et de reddition des comptes, leur mise en œuvre demeure, dans les faits, inégale et rarement documentée. C'est dans cette optique que l'institut articule l'analyse juridique, l'enquête empirique et la construction d'indices, de sorte que chaque constat puisse être vérifié, discuté et comparé dans le temps.",
+  "mission_en": "The Institute's mission is to produce and share the knowledge needed to judge public action on the evidence. Accountability cannot simply be decreed. It requires the rule to be known, its application to be observed and the gap between the two to be measured, then brought to the attention of those entitled to demand an account, whether citizens, parliaments, courts or the State's partners.\n\nWhile the laws adopted in recent years, in Mali and across the region, formally enshrine duties of transparency and accountability, their implementation remains uneven in practice and is seldom documented. For this reason the Institute combines legal analysis, empirical enquiry and the construction of indices, so that every finding can be checked, discussed and compared over time.",
+  "nom_titre": "Hakili",
+  "nom_titre_en": "Hakili",
+  "nom_texte": "Hakili désigne, en bambara, l'intelligence et la faculté de discernement. L'institut est issu de la transformation du Réseau HAKILI, association préexistante dont l'assemblée générale extraordinaire a engagé le changement de dénomination et la refonte des statuts, avec en filigrane la volonté de passer de l'engagement associatif à la production de savoirs vérifiables.",
+  "nom_texte_en": "In Bambara, hakili means intelligence and the capacity for discernment. The Institute grew out of the HAKILI Network, an existing association whose extraordinary general meeting initiated its change of name and the overhaul of its statutes, with the aim of moving from civic engagement to the production of verifiable knowledge.",
+  "demarche_titre": "Notre démarche",
+  "demarche_titre_en": "Our approach",
+  "demarche_texte": "Quatre temps, toujours dans le même ordre, de la règle de droit jusqu'au débat public.",
+  "demarche_texte_en": "Four steps, always in the same order, from the rule of law to public debate.",
+  "etapes": [
+    {
+      "titre": "Établir la règle",
+      "titre_en": "Establish the rule",
+      "texte": "Identifier le texte applicable, son champ et les obligations qu'il consacre, en l'occurrence la loi, le décret, la convention ou l'engagement international dont il s'agit d'apprécier la mise en œuvre.",
+      "texte_en": "Identify the applicable text, its scope and the obligations it lays down, whether a law, a decree, a contract or an international commitment whose implementation is being assessed."
+    },
+    {
+      "titre": "Observer la pratique",
+      "titre_en": "Observe practice",
+      "texte": "Recueillir, suivant des protocoles de collecte explicites, les données, documents et témoignages qui renseignent sur l'application effective de la règle.",
+      "texte_en": "Collect, under explicit protocols, the data, documents and testimonies that show how the rule is actually applied."
+    },
+    {
+      "titre": "Mesurer l'écart",
+      "titre_en": "Measure the gap",
+      "texte": "Qualifier la distance entre ce que prévoit la règle et ce qui s'observe dans les faits, puis la quantifier autant que faire se peut au moyen d'indicateurs sourcés.",
+      "texte_en": "Characterise and, wherever possible, quantify the distance between what the rule provides and what is observed in practice, using sourced indicators."
+    },
+    {
+      "titre": "Rendre public",
+      "titre_en": "Make it public",
+      "texte": "Publier les résultats, les soumettre à la discussion et formuler des recommandations à même d'éclairer la décision publique.",
+      "texte_en": "Publish the findings, open them to discussion and make recommendations that can inform public decision-making."
+    }
+  ],
+  "gouvernance_titre": "Gouvernance",
+  "gouvernance_titre_en": "Governance",
+  "gouvernance": "L'assemblée générale réunit les membres de l'institut. Elle élit un conseil d'administration de sept membres pour un mandat de trois ans. Un bureau exécutif, dirigé par le Directeur exécutif, assure la conduite des activités de l'institut.",
+  "gouvernance_en": "The general meeting brings together the members of the Institute. It elects a board of directors of seven members for a three-year term. An executive bureau, led by the Executive Director, runs the Institute's activities."
+}

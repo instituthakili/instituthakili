@@ -1,0 +1,18 @@
+---
+import { UI, libelle, route } from '../lib/i18n.js';
+import { url, tr, seulementFr, media } from '../lib/content.js';
+import { dateAffichee, extrait } from '../lib/format.js';
+interface Props { a: any; lang: 'fr' | 'en'; avecImage?: boolean }
+const { a, lang, avecImage = true } = Astro.props;
+const image = media(a.data.image);
+const fr = seulementFr(a.data, 'titre', lang);
+---
+<a class="nouvelle" href={url(route('actualite', lang, a.slug))}>
+  {avecImage && image && <img class="nouvelle__image" src={image} alt="" loading="lazy" decoding="async" />}
+  <div class="nouvelle__meta">
+    <span class="surtitre">{libelle('categoriesActualite', a.data.categorie || 'institut', lang)}</span>
+    <span class="meta">{dateAffichee(a, lang, 'jour')}</span>
+  </div>
+  <h3 lang={fr ? 'fr' : undefined}>{tr(a.data, 'titre', lang)}</h3>
+  {tr(a.data, 'chapo', lang) && <p lang={seulementFr(a.data, 'chapo', lang) ? 'fr' : undefined}>{extrait(tr(a.data, 'chapo', lang), 200)}</p>}
+</a>

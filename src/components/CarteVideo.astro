@@ -1,0 +1,23 @@
+---
+import Logo from './Logo.astro';
+import Icone from './Icone.astro';
+import { UI, libelle, route } from '../lib/i18n.js';
+import { url, tr, seulementFr, media, videoSource } from '../lib/content.js';
+import { moisAnnee } from '../lib/format.js';
+interface Props { v: any; lang: 'fr' | 'en' }
+const { v, lang } = Astro.props;
+const src = videoSource(v);
+const affiche = media(v.data.affiche) || (src?.type === 'youtube' ? `https://i.ytimg.com/vi/${src.id}/hqdefault.jpg` : '');
+---
+<a class="video-carte" href={url(route('video', lang, v.slug))}>
+  <span class="vignette">
+    <Logo symboleSeul />
+    {affiche && <img src={affiche} alt="" loading="lazy" decoding="async" onerror="this.remove()" />}
+    <span class="vignette__lecture"><Icone nom="lecture" /></span>
+  </span>
+  <span class="nouvelle__meta">
+    {v.data.format && <span class="surtitre">{libelle('formatsVideo', v.data.format, lang)}</span>}
+    <span class="meta">{[moisAnnee(v.date, lang), v.data.duree].filter(Boolean).join(' · ')}</span>
+  </span>
+  <h3 style="font-size:1.2rem" lang={seulementFr(v.data, 'titre', lang) ? 'fr' : undefined}>{tr(v.data, 'titre', lang)}</h3>
+</a>

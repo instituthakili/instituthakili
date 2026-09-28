@@ -1,0 +1,24 @@
+---
+// Pictogrammes au trait, 24 x 24, couleur héritée du texte.
+interface Props { nom: string; class?: string }
+const { nom, class: cls = '' } = Astro.props;
+const traces: Record<string, string> = {
+  'fleche-droite': 'M5 12h14M13 6l6 6-6 6',
+  'fleche-gauche': 'M19 12H5M11 18l-6-6 6-6',
+  telecharger: 'M12 4v11M7 10l5 5 5-5M5 20h14',
+  externe: 'M14 5h5v5M19 5l-8 8M18 14v5H5V6h5',
+  document: 'M7 3h7l5 5v13H7zM14 3v5h5M10 13h6M10 17h6',
+  lecture: 'M8 5v14l11-7z',
+  menu: 'M4 7h16M4 12h16M4 17h16',
+  fermer: 'M6 6l12 12M18 6L6 18',
+  copier: 'M9 9h10v10H9zM5 15V5h10',
+  calendrier: 'M4 6h16v14H4zM4 10h16M9 3v5M15 3v5',
+  lieu: 'M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21zM12 12a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5z',
+  courriel: 'M4 6h16v12H4zM4 7l8 6 8-6',
+  telephone: 'M6.6 3.5l3 3.3-1.8 2.4a12 12 0 0 0 7 7l2.4-1.8 3.3 3-1.6 3.1C11 20 4 13 3.5 5.1z',
+  cadenas: 'M6 11h12v9H6zM8.5 11V8a3.5 3.5 0 0 1 7 0v3',
+};
+const d = traces[nom] || '';
+const plein = nom === 'lecture';
+---
+<svg class={cls} viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill={plein ? 'currentColor' : 'none'} stroke={plein ? 'none' : 'currentColor'} stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d={d} /></svg>

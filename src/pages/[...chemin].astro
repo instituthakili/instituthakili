@@ -1,0 +1,57 @@
+---
+// Routeur unique : chaque page du site, en français et en anglais, est générée ici.
+import { contenus } from '../lib/content.js';
+import { route, LANGS } from '../lib/i18n.js';
+import Accueil from '../views/Accueil.astro';
+import Institut from '../views/Institut.astro';
+import Axes from '../views/Axes.astro';
+import Indices from '../views/Indices.astro';
+import Indice from '../views/Indice.astro';
+import Publications from '../views/Publications.astro';
+import Publication from '../views/Publication.astro';
+import Mediatheque from '../views/Mediatheque.astro';
+import Video from '../views/Video.astro';
+import Actualites from '../views/Actualites.astro';
+import Actualite from '../views/Actualite.astro';
+import Evenement from '../views/Evenement.astro';
+import Contact from '../views/Contact.astro';
+import Mentions from '../views/Mentions.astro';
+
+export async function getStaticPaths() {
+  const c = await contenus();
+  const pages: any[] = [];
+  const ajouter = (cle: string, lang: string, slug = '') => {
+    const chemin = route(cle, lang, slug).replace(/^\/+|\/+$/g, '');
+    pages.push({ params: { chemin: chemin || undefined }, props: { cle, lang, slug } });
+  };
+  for (const lang of LANGS) {
+    ['accueil', 'institut', 'axes', 'indices', 'publications', 'mediatheque', 'actualites', 'contact', 'mentions'].forEach((k) => ajouter(k, lang));
+    c.indices.forEach((x) => ajouter('indice', lang, x.slug));
+    c.publications.forEach((x) => ajouter('publication', lang, x.slug));
+    c.videos.forEach((x) => ajouter('video', lang, x.slug));
+    c.actualites.forEach((x) => ajouter('actualite', lang, x.slug));
+    c.agenda.forEach((x) => ajouter('evenement', lang, x.slug));
+  }
+  return pages;
+}
+
+const { cle, lang, slug } = Astro.props;
+const vues: Record<string, any> = {
+  accueil: Accueil,
+  institut: Institut,
+  axes: Axes,
+  indices: Indices,
+  indice: Indice,
+  publications: Publications,
+  publication: Publication,
+  mediatheque: Mediatheque,
+  video: Video,
+  actualites: Actualites,
+  actualite: Actualite,
+  evenement: Evenement,
+  contact: Contact,
+  mentions: Mentions,
+};
+const Vue = vues[cle];
+---
+<Vue lang={lang} cle={cle} slug={slug} />

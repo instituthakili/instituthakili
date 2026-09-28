@@ -1,0 +1,39 @@
+---
+import Base from '../layouts/Base.astro';
+import Intro from '../components/Intro.astro';
+import CarteVideo from '../components/CarteVideo.astro';
+import Logo from '../components/Logo.astro';
+import { UI, route } from '../lib/i18n.js';
+import { contenus, url } from '../lib/content.js';
+
+interface Props { lang: 'fr' | 'en'; cle: string; slug?: string }
+const { lang, cle } = Astro.props;
+const t = UI[lang];
+const c = await contenus();
+const alterne = url(route(cle, lang === 'fr' ? 'en' : 'fr'));
+const intro = lang === 'fr'
+  ? "Conférences, entretiens, débats et capsules d’analyse consacrés aux travaux de l’institut."
+  : "Conferences, interviews, debates and short analytical videos on the Institute’s work.";
+---
+<Base lang={lang} cle={cle} alterne={alterne} titre={t.nav.mediatheque} description={intro}>
+  <Intro
+    surtitre={lang === 'fr' ? 'Vidéos' : 'Videos'}
+    titre={t.nav.mediatheque}
+    texte={intro}
+    fil={[{ libelle: t.nav.accueil, lien: url(route('accueil', lang)) }, { libelle: t.nav.mediatheque }]}
+  />
+  <section class="section">
+    <div class="conteneur">
+      {c.videos.length > 0 ? (
+        <div class="videos">
+          {c.videos.map((v) => <CarteVideo v={v} lang={lang} />)}
+        </div>
+      ) : (
+        <div class="vide">
+          <Logo symboleSeul />
+          <p>{t.mediathequeVide}</p>
+        </div>
+      )}
+    </div>
+  </section>
+</Base>

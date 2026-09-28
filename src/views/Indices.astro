@@ -1,0 +1,29 @@
+---
+import Base from '../layouts/Base.astro';
+import Intro from '../components/Intro.astro';
+import CarteIndice from '../components/CarteIndice.astro';
+import { UI, route } from '../lib/i18n.js';
+import { contenus, url, tr } from '../lib/content.js';
+
+interface Props { lang: 'fr' | 'en'; cle: string; slug?: string }
+const { lang, cle } = Astro.props;
+const t = UI[lang];
+const c = await contenus();
+const page = c.pages.accueil;
+const alterne = url(route(cle, lang === 'fr' ? 'en' : 'fr'));
+---
+<Base lang={lang} cle={cle} alterne={alterne} titre={tr(page, 'indices_titre', lang)} description={tr(page, 'indices_texte', lang)}>
+  <Intro
+    surtitre={lang === 'fr' ? 'Mesurer' : 'Measuring'}
+    titre={tr(page, 'indices_titre', lang)}
+    texte={tr(page, 'indices_texte', lang)}
+    fil={[{ libelle: t.nav.accueil, lien: url(route('accueil', lang)) }, { libelle: t.nav.indices }]}
+  />
+  <section class="section section--teinte">
+    <div class="conteneur">
+      <div class="indices">
+        {c.indices.map((i) => <CarteIndice i={i} lang={lang} />)}
+      </div>
+    </div>
+  </section>
+</Base>

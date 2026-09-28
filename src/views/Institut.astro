@@ -1,0 +1,141 @@
+---
+import Base from '../layouts/Base.astro';
+import Intro from '../components/Intro.astro';
+import Personne from '../components/Personne.astro';
+import Icone from '../components/Icone.astro';
+import { UI, route, libelle } from '../lib/i18n.js';
+import { contenus, url, tr, md, media } from '../lib/content.js';
+
+interface Props { lang: 'fr' | 'en'; cle: string; slug?: string }
+const { lang, cle } = Astro.props;
+const t = UI[lang];
+const c = await contenus();
+const page = c.pages.institut;
+const r = c.reglages;
+const alterne = url(route(cle, lang === 'fr' ? 'en' : 'fr'));
+const direction = c.equipe.filter((m) => m.data.groupe === 'direction');
+const conseil = c.equipe.filter((m) => m.data.groupe === 'conseil');
+const equipe = c.equipe.filter((m) => m.data.groupe === 'equipe');
+const associes = c.equipe.filter((m) => m.data.groupe === 'associes');
+const etapes = page.etapes || [];
+---
+<Base lang={lang} cle={cle} alterne={alterne} titre={t.nav.institut} description={tr(page, 'intro_texte', lang)}>
+  <Intro
+    surtitre={t.nav.institut}
+    titre={tr(page, 'intro_titre', lang)}
+    texte={tr(page, 'intro_texte', lang)}
+    fil={[{ libelle: t.nav.accueil, lien: url(route('accueil', lang)) }, { libelle: t.nav.institut }]}
+  />
+
+  <section class="section">
+    <div class="conteneur colonnes">
+      <div class="pile" style="gap:56px">
+        <div class="pile" style="gap:20px">
+          <h2>{tr(page, 'mission_titre', lang)}</h2>
+          <div class="prose" set:html={md(tr(page, 'mission', lang))} />
+        </div>
+        <div class="pile" style="gap:20px">
+          <h2>{tr(page, 'nom_titre', lang)}</h2>
+          <div class="prose" set:html={md(tr(page, 'nom_texte', lang))} />
+        </div>
+      </div>
+      <aside class="colonne-collante">
+        <div class="encadre">
+          <h2>{lang === 'fr' ? "Carte d’identité" : 'At a glance'}</h2>
+          <dl class="carte-identite">
+            <div><dt>{lang === 'fr' ? 'Dénomination' : 'Name'}</dt><dd>{r.nom_complet}</dd></div>
+            {r.sigle && <div><dt>{lang === 'fr' ? 'Sigle' : 'Acronym'}</dt><dd>{r.sigle}</dd></div>}
+            <div><dt>{lang === 'fr' ? 'Forme juridique' : 'Legal form'}</dt><dd>{lang === 'fr' ? 'Association de droit malien' : 'Association under Malian law'}</dd></div>
+            <div><dt>{lang === 'fr' ? 'Siège' : 'Headquarters'}</dt><dd>{tr(r, 'adresse', lang)}</dd></div>
+            {direction[0] && <div><dt>{lang === 'fr' ? 'Direction' : 'Management'}</dt><dd>{direction[0].data.nom}, {tr(direction[0].data, 'fonction', lang).toLowerCase()}</dd></div>}
+          </dl>
+          <a class="bouton bouton--contour" href={url(route('contact', lang))}>{t.ecrire}</a>
+        </div>
+      </aside>
+    </div>
+  </section>
+
+  {etapes.length > 0 && (
+    <section class="section section--teinte">
+      <div class="conteneur">
+        <div class="tete-section">
+          <div class="tete-section__texte">
+            <p class="surtitre">{lang === 'fr' ? 'Méthode' : 'Method'}</p>
+            <h2>{tr(page, 'demarche_titre', lang)}</h2>
+            {tr(page, 'demarche_texte', lang) && <p>{tr(page, 'demarche_texte', lang)}</p>}
+          </div>
+        </div>
+        <ol class="etapes">
+          {etapes.map((e: any) => (
+            <li class="etape">
+              <h3>{tr(e, 'titre', lang)}</h3>
+              <p>{tr(e, 'texte', lang)}</p>
+            </li>
+          ))}
+        </ol>
+      </div>
+    </section>
+  )}
+
+  <section class="section" id="direction">
+    <div class="conteneur grille-2">
+      <div class="pile" style="gap:20px">
+        <p class="surtitre">{lang === 'fr' ? 'Organes' : 'Bodies'}</p>
+        <h2>{tr(page, 'gouvernance_titre', lang)}</h2>
+        <div class="prose" set:html={md(tr(page, 'gouvernance', lang))} />
+      </div>
+      {direction.map((m) => (
+        <div class="encadre" style="gap:14px">
+          <h2>{libelle('groupesEquipe', 'direction', lang)}</h2>
+          {media(m.data.photo) && <img class="direction__portrait" src={media(m.data.photo)} alt={m.data.nom} />}
+          <h3 style="font-size:1.6rem">{m.data.nom}</h3>
+          <p class="direction__fonction">{tr(m.data, 'fonction', lang)}</p>
+          <div class="prose" style="font-size:1.05rem;color:var(--encre-2)" set:html={md(tr(m.data, 'bio', lang))} />
+        </div>
+      ))}
+    </div>
+  </section>
+
+  {conseil.length > 0 && (
+    <section class="section section--blanche" id="conseil">
+      <div class="conteneur">
+        <div class="tete-section">
+          <div class="tete-section__texte">
+            <p class="surtitre">{lang === 'fr' ? 'Gouvernance' : 'Governance'}</p>
+            <h2>{libelle('groupesEquipe', 'conseil', lang)}</h2>
+          </div>
+        </div>
+        <ul class="personnes">
+          {conseil.map((m) => <Personne m={m} lang={lang} />)}
+        </ul>
+      </div>
+    </section>
+  )}
+
+  {[['equipe', equipe], ['associes', associes]].filter(([, l]) => (l as any[]).length > 0).map(([g, l]) => (
+    <section class="section">
+      <div class="conteneur">
+        <div class="tete-section">
+          <div class="tete-section__texte"><h2>{libelle('groupesEquipe', g as string, lang)}</h2></div>
+        </div>
+        <ul class="personnes">
+          {(l as any[]).map((m) => <Personne m={m} lang={lang} />)}
+        </ul>
+      </div>
+    </section>
+  ))}
+
+  <section class="section section--serree">
+    <div class="conteneur">
+      <div class="appel">
+        <div>
+          <h2>{lang === 'fr' ? 'Rejoindre les travaux de l’institut' : "Join the Institute’s work"}</h2>
+          <p>{lang === 'fr'
+            ? "Chercheurs, praticiens, institutions et partenaires peuvent contribuer aux travaux de l’institut, qu’il s’agisse de participer à une étude, de déployer un indice dans un nouveau pays ou d’accueillir une séance de restitution."
+            : "Researchers, practitioners, institutions and partners can contribute to the Institute’s work, whether by taking part in a study, rolling out an index in a new country or hosting a presentation of findings."}</p>
+        </div>
+        <a class="bouton bouton--clair" href={url(route('contact', lang))}>{t.ecrire}<Icone nom="fleche-droite" /></a>
+      </div>
+    </div>
+  </section>
+</Base>

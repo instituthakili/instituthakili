@@ -1,0 +1,19 @@
+{
+  "name": "site-institut-hakili",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Site internet de l'Institut HAKILI pour la Gouvernance et la Redevabilité en Afrique",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview"
+  },
+  "engines": {
+    "node": ">=20.3.0"
+  },
+  "dependencies": {
+    "astro": "^5.18.2",
+    "marked": "^18.0.14"
+  }
+}

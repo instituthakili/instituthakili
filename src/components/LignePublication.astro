@@ -1,0 +1,37 @@
+---
+import Icone from './Icone.astro';
+import { UI, libelle, route } from '../lib/i18n.js';
+import { url, tr, seulementFr, media } from '../lib/content.js';
+import { dateAffichee, tailleFichier } from '../lib/format.js';
+interface Props { p: any; lang: 'fr' | 'en'; niveauTitre?: 'h2' | 'h3' }
+const { p, lang, niveauTitre = 'h3' } = Astro.props;
+const t = UI[lang];
+const titre = tr(p.data, 'titre', lang);
+const sousTitre = tr(p.data, 'sous_titre', lang);
+const fr = seulementFr(p.data, 'titre', lang);
+const affichageDate = dateAffichee(p, lang);
+const fichier = media(p.data.fichier);
+const taille = tailleFichier(p.data.fichier, lang);
+const format = fichier ? `PDF${taille ? ' · ' + taille : ''}` : p.data.lien ? t.lienExterne : p.data.pages ? `${p.data.pages} ${t.pagesAbrev}` : '';
+const Titre = niveauTitre;
+---
+<li class="registre__ligne" data-publication data-type={p.type} data-themes={(p.themes || []).join(' ')} data-annee={p.date ? p.date.getUTCFullYear() : ''} data-texte={[titre, sousTitre, p.data.titre, (p.auteurs || []).join(' '), p.data.source, tr(p.data, 'resume', lang)].filter(Boolean).join(' ').toLowerCase()}>
+  <a class="registre__lien" href={url(route('publication', lang, p.slug))}>
+    <div class="registre__cote">
+      <span class="registre__type">{libelle('typesPublication', p.type, lang)}</span>
+      <span class="meta">{affichageDate}</span>
+    </div>
+    <div>
+      <Titre class="registre__titre" lang={fr ? 'fr' : undefined}>{titre}{sousTitre && <span class="visuellement-cache">. </span>}</Titre>
+      {sousTitre && <p class="registre__source" style="font-style:normal" lang={fr ? 'fr' : undefined}>{sousTitre}</p>}
+      {p.data.source && <p class="registre__source">{p.data.source}</p>}
+      {p.auteurs?.length > 0 && <p class="registre__auteurs">{p.auteurs.join(', ')}</p>}
+    </div>
+    {format && (
+      <span class="registre__format">
+        <Icone nom={fichier ? 'document' : p.data.lien ? 'externe' : 'document'} />
+        {format}
+      </span>
+    )}
+  </a>
+</li>

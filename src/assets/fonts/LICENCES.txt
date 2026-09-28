@@ -1,0 +1,13 @@
+Polices utilisées par le site de l'Institut HAKILI
+
+Newsreader (newsreader.woff2, newsreader-italic.woff2)
+Copyright 2020 The Newsreader Project Authors (https://github.com/productiontype/Newsreader)
+Licence SIL Open Font License, version 1.1, https://openfontlicense.org
+
+Figtree (figtree.woff2)
+Copyright 2022 The Figtree Project Authors (https://github.com/erikdkennedy/figtree)
+Licence SIL Open Font License, version 1.1, https://openfontlicense.org
+
+TeX Gyre Adventor (adventor-bold.woff2, conversion au format WOFF2 sans modification des dessins)
+Copyright 2007-2018 B. Jackowski, J. M. Nowacki et al., au nom des groupes d'utilisateurs de TeX (GUST)
+Licence GUST Font License, https://www.gust.org.pl/projects/e-foundry/licenses

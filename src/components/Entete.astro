@@ -1,0 +1,60 @@
+---
+import Logo from './Logo.astro';
+import Icone from './Icone.astro';
+import { UI, NAV, route } from '../lib/i18n.js';
+import { url } from '../lib/content.js';
+
+interface Props { lang: 'fr' | 'en'; cle?: string; alterne: string }
+const { lang, cle = '', alterne } = Astro.props;
+const t = UI[lang];
+// Rubrique active : une fiche de publication active « Publications », etc.
+const parent: Record<string, string> = { indice: 'indices', publication: 'publications', video: 'mediatheque', actualite: 'actualites', evenement: 'actualites' };
+const actif = parent[cle] || cle;
+---
+<header class="entete" data-entete>
+  <div class="conteneur entete__barre">
+    <a class="entete__marque" href={url(route('accueil', lang))} aria-label={lang === 'fr' ? "Institut HAKILI, page d’accueil" : 'HAKILI Institute, home page'}>
+      <Logo titre={lang === 'fr' ? 'Institut HAKILI' : 'HAKILI Institute'} />
+    </a>
+    <button class="entete__menu" type="button" aria-expanded="false" aria-controls="navigation" data-bouton-menu>
+      <Icone nom="menu" />
+      <span data-libelle-menu>{t.menu}</span>
+    </button>
+    <nav class="entete__nav" id="navigation" aria-label={t.navPrincipale}>
+      <ul class="entete__liens">
+        {NAV.map((c) => (
+          <li>
+            <a href={url(route(c, lang))} aria-current={actif === c && c === cle ? 'page' : undefined} class={actif === c ? 'actif' : undefined}>
+              {t.nav[c]}
+            </a>
+          </li>
+        ))}
+      </ul>
+      <a class="entete__langue" href={alterne} hreflang={lang === 'fr' ? 'en' : 'fr'} lang={lang === 'fr' ? 'en' : 'fr'} aria-label={t.autreLangue}>
+        {t.autreLangueCourt}
+      </a>
+    </nav>
+  </div>
+</header>
+
+<script>
+  const entete = document.querySelector('[data-entete]');
+  const bouton = document.querySelector('[data-bouton-menu]');
+  if (entete && bouton) {
+    const libelle = bouton.querySelector('[data-libelle-menu]');
+    const texteOuvrir = libelle ? libelle.textContent : '';
+    const texteFermer = document.documentElement.lang === 'en' ? 'Close' : 'Fermer';
+    const basculer = (ouvert) => {
+      entete.setAttribute('data-ouvert', String(ouvert));
+      bouton.setAttribute('aria-expanded', String(ouvert));
+      if (libelle) libelle.textContent = ouvert ? texteFermer : texteOuvrir;
+    };
+    bouton.addEventListener('click', () => basculer(bouton.getAttribute('aria-expanded') !== 'true'));
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && bouton.getAttribute('aria-expanded') === 'true') {
+        basculer(false);
+        bouton.focus();
+      }
+    });
+  }
+</script>

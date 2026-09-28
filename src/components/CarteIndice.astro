@@ -1,0 +1,31 @@
+---
+import Icone from './Icone.astro';
+import Echelle from './Echelle.astro';
+import { UI, libelle, route } from '../lib/i18n.js';
+import { url, tr, typo } from '../lib/content.js';
+interface Props { i: any; lang: 'fr' | 'en' }
+const { i, lang } = Astro.props;
+const t = UI[lang];
+const chiffres = (i.data.chiffres || []).filter((c: any) => c && c.valeur);
+---
+<a class="indice" href={url(route('indice', lang, i.slug))}>
+  <div class="indice__tete">
+    <span class="indice__sigle">{tr(i.data, 'sigle', lang)}</span>
+    {i.data.statut && (
+      <span class={`pastille ${i.data.statut === 'conception' ? 'pastille--terre' : ''}`}>
+        <span class="pastille__point"></span>{libelle('statutsIndice', i.data.statut, lang)}
+      </span>
+    )}
+  </div>
+  <h3 class="indice__nom">{tr(i.data, 'nom', lang)}</h3>
+  <p class="indice__accroche">{tr(i.data, 'accroche', lang)}</p>
+  <Echelle composantes={i.data.composantes || []} lang={lang} />
+  {chiffres.length > 0 && (
+    <ul class="indice__chiffres">
+      {chiffres.map((c: any) => (
+        <li><strong>{c.valeur}</strong><span>{typo((lang === 'en' && c.libelle_en) || c.libelle)}</span></li>
+      ))}
+    </ul>
+  )}
+  <span class="lien-fleche">{t.voirFiche}<Icone nom="fleche-droite" /></span>
+</a>

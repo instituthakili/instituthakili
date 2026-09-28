@@ -1,0 +1,683 @@
+# Espace d'administration du site de l'Institut HAKILI (Pages CMS, https://app.pagescms.org)
+# Ce fichier décrit les formulaires de saisie. Il n'est pas nécessaire de le modifier.
+
+media:
+  - name: images
+    label: Images et photos
+    input: public/media/images
+    output: /media/images
+    categories: [image]
+    rename: safe
+  - name: documents
+    label: Documents PDF
+    input: public/media/documents
+    output: /media/documents
+    extensions: [pdf]
+    rename: safe
+  - name: videos
+    label: Fichiers vidéo
+    input: public/media/videos
+    output: /media/videos
+    extensions: [mp4, webm]
+    rename: safe
+
+settings:
+  content:
+    merge: true
+
+content:
+  # ------------------------------------------------------------------
+  - name: publications
+    label: Publications
+    type: collection
+    path: contenu/publications
+    format: yaml-frontmatter
+    filename: "{primary}.md"
+    view:
+      fields: [titre, type, date, publie]
+      primary: titre
+      sort: [date, titre]
+      search: [titre, resume, auteurs]
+      default:
+        sort: date
+        order: desc
+    fields:
+      - name: titre
+        label: Titre
+        type: string
+        required: true
+      - name: sous_titre
+        label: Sous-titre
+        description: Facultatif. Il s'affiche sous le titre.
+        type: string
+      - name: type
+        label: Type de publication
+        type: select
+        default: note-analyse
+        options:
+          values:
+            - { name: note-analyse, label: "Note d'analyse" }
+            - { name: etude, label: "Étude" }
+            - { name: rapport, label: "Rapport" }
+            - { name: article, label: "Article scientifique" }
+            - { name: ouvrage, label: "Ouvrage" }
+            - { name: politique, label: "Papier de politique publique" }
+            - { name: methodologie, label: "Document méthodologique" }
+      - name: date
+        label: Date de parution
+        type: date
+        options:
+          format: yyyy-MM-dd
+      - name: affichage_date
+        label: Précision de la date affichée
+        description: Choisissez « Année seulement » lorsque le jour et le mois ne sont pas connus.
+        type: select
+        default: mois
+        options:
+          values:
+            - { name: mois, label: "Mois et année" }
+            - { name: jour, label: "Date complète" }
+            - { name: annee, label: "Année seulement" }
+      - name: auteurs
+        label: Auteurs
+        description: Une ligne par auteur, par exemple Dr Soumaila LAH.
+        type: string
+        list: true
+      - name: themes
+        label: Thèmes
+        description: Servent au filtrage dans la page Publications.
+        type: select
+        options:
+          multiple: true
+          values:
+            - { name: industries-extractives, label: "Industries extractives" }
+            - { name: droit-minier-petrolier, label: "Droit minier et pétrolier" }
+            - { name: contenu-local, label: "Contenu local" }
+            - { name: transfert-technologie, label: "Transfert de technologie" }
+            - { name: finances-publiques, label: "Finances publiques" }
+            - { name: gouvernance-institutions, label: "Gouvernance des institutions" }
+            - { name: democratie-etat-de-droit, label: "Démocratie et État de droit" }
+            - { name: paix-securite, label: "Paix, sécurité et réconciliation" }
+            - { name: relations-exterieures, label: "Relations extérieures de l'Afrique" }
+      - name: resume
+        label: Résumé
+        description: Quatre à six phrases qui présentent la publication.
+        type: text
+      - name: fichier
+        label: Fichier PDF à télécharger
+        description: Déposez ici le PDF (3 Mo au plus). Pour un fichier plus lourd, indiquez plutôt un lien ci-dessous.
+        type: file
+        options:
+          media: documents
+          extensions: [pdf]
+      - name: lien
+        label: Lien externe
+        description: Adresse complète de la revue, de l'éditeur ou d'un document en ligne, commençant par https.
+        type: string
+      - name: source
+        label: Publié dans
+        description: Revue et numéro, ou éditeur. Par exemple Revue africaine des sciences juridiques, administratives et politiques (RASJAP), n° 4 bis.
+        type: string
+      - name: identifiant
+        label: ISSN ou ISBN
+        type: string
+      - name: pages
+        label: Nombre de pages
+        type: number
+      - name: langue
+        label: Langue du document
+        type: select
+        default: fr
+        options:
+          values:
+            - { name: fr, label: "Français" }
+            - { name: en, label: "Anglais" }
+      - name: couverture
+        label: Image de couverture
+        description: Facultatif. Format portrait conseillé.
+        type: image
+        options:
+          media: images
+      - name: en_avant
+        label: Mettre en avant sur la page d'accueil
+        type: boolean
+        default: false
+      - name: publie
+        label: Visible sur le site
+        description: Décochez pour préparer une publication sans la montrer.
+        type: boolean
+        default: true
+      - name: body
+        label: Présentation détaillée
+        description: Facultatif. Sommaire, contexte, remerciements.
+        type: rich-text
+      - name: titre_en
+        label: Titre en anglais
+        description: Version anglaise, facultative. À défaut, le titre français s'affiche.
+        type: string
+      - name: sous_titre_en
+        label: Sous-titre en anglais
+        type: string
+      - name: resume_en
+        label: Résumé en anglais
+        type: text
+      - name: corps_en
+        label: Présentation détaillée en anglais
+        type: rich-text
+
+  # ------------------------------------------------------------------
+  - name: actualites
+    label: Actualités
+    type: collection
+    path: contenu/actualites
+    format: yaml-frontmatter
+    filename: "{primary}.md"
+    view:
+      fields: [titre, date, categorie, publie]
+      primary: titre
+      sort: [date, titre]
+      default:
+        sort: date
+        order: desc
+    fields:
+      - name: titre
+        label: Titre
+        type: string
+        required: true
+      - name: date
+        label: Date
+        type: date
+        options:
+          format: yyyy-MM-dd
+      - name: affichage_date
+        label: Précision de la date affichée
+        type: select
+        default: jour
+        options:
+          values:
+            - { name: jour, label: "Date complète" }
+            - { name: mois, label: "Mois et année" }
+            - { name: annee, label: "Année seulement" }
+      - name: categorie
+        label: Catégorie
+        type: select
+        default: institut
+        options:
+          values:
+            - { name: institut, label: "Vie de l'institut" }
+            - { name: publication, label: "Publication" }
+            - { name: evenement, label: "Événement" }
+            - { name: presse, label: "Presse" }
+            - { name: appel, label: "Appel" }
+      - name: chapo
+        label: Chapeau
+        description: Une ou deux phrases qui résument l'actualité. Elles apparaissent dans les listes.
+        type: text
+      - name: image
+        label: Image
+        description: Facultatif. Format paysage conseillé (1600 x 900 pixels).
+        type: image
+        options:
+          media: images
+      - name: lien
+        label: Lien associé
+        description: Facultatif. Page du site (par exemple /publications/) ou adresse complète commençant par https.
+        type: string
+      - name: publie
+        label: Visible sur le site
+        type: boolean
+        default: true
+      - name: body
+        label: Texte de l'actualité
+        type: rich-text
+      - name: titre_en
+        label: Titre en anglais
+        description: Version anglaise, facultative.
+        type: string
+      - name: chapo_en
+        label: Chapeau en anglais
+        type: text
+      - name: corps_en
+        label: Texte en anglais
+        type: rich-text
+
+  # ------------------------------------------------------------------
+  - name: agenda
+    label: Agenda
+    type: collection
+    path: contenu/agenda
+    format: yaml-frontmatter
+    filename: "{primary}.md"
+    view:
+      fields: [titre, debut, lieu, publie]
+      primary: titre
+      sort: [debut, titre]
+      default:
+        sort: debut
+        order: desc
+    fields:
+      - name: titre
+        label: Intitulé de l'événement
+        type: string
+        required: true
+      - name: debut
+        label: Début
+        type: date
+        options:
+          time: true
+          format: yyyy-MM-dd'T'HH:mm
+      - name: fin
+        label: Fin
+        description: Facultatif.
+        type: date
+        default: ""
+        options:
+          time: true
+          format: yyyy-MM-dd'T'HH:mm
+      - name: lieu
+        label: Lieu
+        type: string
+      - name: format
+        label: Format
+        type: select
+        default: presentiel
+        options:
+          values:
+            - { name: presentiel, label: "En présentiel" }
+            - { name: en-ligne, label: "En ligne" }
+            - { name: hybride, label: "Hybride" }
+      - name: lien_inscription
+        label: Lien d'inscription
+        description: Facultatif. Adresse complète commençant par https.
+        type: string
+      - name: description
+        label: Présentation
+        type: rich-text
+      - name: publie
+        label: Visible sur le site
+        type: boolean
+        default: true
+      - name: titre_en
+        label: Intitulé en anglais
+        description: Version anglaise, facultative.
+        type: string
+      - name: lieu_en
+        label: Lieu en anglais
+        type: string
+      - name: description_en
+        label: Présentation en anglais
+        type: rich-text
+
+  # ------------------------------------------------------------------
+  - name: videos
+    label: Médiathèque
+    type: collection
+    path: contenu/videos
+    format: yaml-frontmatter
+    filename: "{primary}.md"
+    view:
+      fields: [titre, date, format, publie]
+      primary: titre
+      sort: [date, titre]
+      default:
+        sort: date
+        order: desc
+    fields:
+      - name: titre
+        label: Titre de la vidéo
+        type: string
+        required: true
+      - name: date
+        label: Date
+        type: date
+        options:
+          format: yyyy-MM-dd
+      - name: lien_video
+        label: Lien YouTube ou Vimeo
+        description: Collez l'adresse de la vidéo telle qu'elle apparaît dans le navigateur. C'est la solution recommandée.
+        type: string
+      - name: fichier_video
+        label: Ou fichier vidéo
+        description: Uniquement pour de très courts extraits (3 Mo au plus). Utilisez YouTube pour les vidéos longues.
+        type: file
+        options:
+          media: videos
+          extensions: [mp4, webm]
+      - name: affiche
+        label: Image d'aperçu
+        description: Facultatif pour YouTube, dont l'image est reprise automatiquement.
+        type: image
+        options:
+          media: images
+      - name: duree
+        label: Durée
+        description: Par exemple 12 min.
+        type: string
+      - name: format
+        label: Format
+        type: select
+        default: conference
+        options:
+          values:
+            - { name: conference, label: "Conférence" }
+            - { name: entretien, label: "Entretien" }
+            - { name: capsule, label: "Capsule d'analyse" }
+            - { name: presentation, label: "Présentation" }
+            - { name: debat, label: "Débat" }
+      - name: description
+        label: Présentation
+        type: text
+      - name: publie
+        label: Visible sur le site
+        type: boolean
+        default: true
+      - name: titre_en
+        label: Titre en anglais
+        description: Version anglaise, facultative.
+        type: string
+      - name: description_en
+        label: Présentation en anglais
+        type: text
+
+  # ------------------------------------------------------------------
+  - name: indices
+    label: Indices et baromètres
+    type: collection
+    path: contenu/indices
+    format: yaml-frontmatter
+    filename: "{fields.sigle}.md"
+    view:
+      fields: [sigle, nom, statut]
+      primary: nom
+      sort: [ordre]
+      default:
+        sort: ordre
+        order: asc
+    fields:
+      - name: sigle
+        label: Sigle
+        type: string
+        required: true
+      - name: nom
+        label: Nom complet
+        type: string
+      - name: accroche
+        label: Accroche
+        description: Une phrase qui dit ce que mesure l'instrument.
+        type: text
+      - name: statut
+        label: État d'avancement
+        type: select
+        default: conception
+        options:
+          values:
+            - { name: conception, label: "En conception" }
+            - { name: cadre, label: "Cadre méthodologique établi" }
+            - { name: collecte, label: "Collecte en cours" }
+            - { name: publie, label: "Résultats publiés" }
+      - name: perimetre
+        label: Périmètre
+        type: string
+      - name: chiffres
+        label: Chiffres clés
+        description: Par exemple 9 pays, 44 indicateurs.
+        type: object
+        list:
+          max: 4
+        fields:
+          - { name: valeur, label: Valeur, type: string }
+          - { name: libelle, label: Libellé, type: string }
+          - { name: libelle_en, label: Libellé en anglais, type: string }
+      - name: composantes
+        label: Répartition des points
+        description: Facultatif. Chaque volet et son nombre de points, pour la barre de notation.
+        type: object
+        list:
+          max: 4
+        fields:
+          - { name: nom, label: Volet, type: string }
+          - { name: nom_en, label: Volet en anglais, type: string }
+          - { name: points, label: Points, type: number }
+      - name: ordre
+        label: Ordre d'affichage
+        type: number
+      - name: publie
+        label: Visible sur le site
+        type: boolean
+        default: true
+      - name: body
+        label: Présentation détaillée
+        type: rich-text
+      - name: sigle_en
+        label: Sigle en anglais
+        description: Version anglaise, facultative.
+        type: string
+      - name: nom_en
+        label: Nom en anglais
+        type: string
+      - name: accroche_en
+        label: Accroche en anglais
+        type: text
+      - name: perimetre_en
+        label: Périmètre en anglais
+        type: string
+      - name: corps_en
+        label: Présentation détaillée en anglais
+        type: rich-text
+
+  # ------------------------------------------------------------------
+  - name: equipe
+    label: Direction et conseil
+    type: collection
+    path: contenu/equipe
+    format: yaml-frontmatter
+    filename: "{primary}.md"
+    view:
+      fields: [nom, fonction, groupe, ordre]
+      primary: nom
+      sort: [ordre, nom]
+      default:
+        sort: ordre
+        order: asc
+    fields:
+      - name: nom
+        label: Nom
+        description: Avec le titre éventuel, par exemple Dr ou Pr.
+        type: string
+        required: true
+      - name: fonction
+        label: Fonction ou qualité
+        type: string
+      - name: groupe
+        label: Rubrique
+        type: select
+        default: conseil
+        options:
+          values:
+            - { name: direction, label: "Direction" }
+            - { name: conseil, label: "Conseil d'administration" }
+            - { name: equipe, label: "Équipe" }
+            - { name: associes, label: "Chercheurs associés" }
+      - name: ordre
+        label: Ordre d'affichage
+        type: number
+      - name: photo
+        label: Photo
+        description: Facultatif. Format carré conseillé.
+        type: image
+        options:
+          media: images
+      - name: bio
+        label: Biographie
+        description: Utilisée pour la direction.
+        type: text
+      - name: expertises
+        label: Domaines d'expertise
+        type: string
+        list: true
+      - name: courriel
+        label: Adresse électronique
+        type: string
+      - name: linkedin
+        label: Profil LinkedIn
+        type: string
+      - name: publie
+        label: Visible sur le site
+        type: boolean
+        default: true
+      - name: fonction_en
+        label: Fonction en anglais
+        description: Version anglaise, facultative.
+        type: string
+      - name: bio_en
+        label: Biographie en anglais
+        type: text
+      - name: expertises_en
+        label: Domaines d'expertise en anglais
+        type: string
+        list: true
+
+  # ------------------------------------------------------------------
+  - name: page_accueil
+    label: Page d'accueil
+    type: file
+    path: contenu/pages/accueil.json
+    format: json
+    fields:
+      - { name: surtitre, label: Petite ligne au-dessus du titre, type: string }
+      - { name: titre, label: Grand titre, type: string }
+      - { name: texte, label: Texte de présentation, type: text }
+      - { name: indices_titre, label: Titre de la rubrique indices, type: string }
+      - { name: indices_texte, label: Texte de la rubrique indices, type: text }
+      - { name: axes_titre, label: Titre de la rubrique axes, type: string }
+      - { name: axes_texte, label: Texte de la rubrique axes, type: text }
+      - { name: appel_titre, label: Titre du bandeau final, type: string }
+      - { name: appel_texte, label: Texte du bandeau final, type: text }
+      - { name: surtitre_en, label: Petite ligne en anglais, type: string }
+      - { name: titre_en, label: Grand titre en anglais, type: string }
+      - { name: texte_en, label: Texte de présentation en anglais, type: text }
+      - { name: indices_titre_en, label: Titre de la rubrique indices en anglais, type: string }
+      - { name: indices_texte_en, label: Texte de la rubrique indices en anglais, type: text }
+      - { name: axes_titre_en, label: Titre de la rubrique axes en anglais, type: string }
+      - { name: axes_texte_en, label: Texte de la rubrique axes en anglais, type: text }
+      - { name: appel_titre_en, label: Titre du bandeau final en anglais, type: string }
+      - { name: appel_texte_en, label: Texte du bandeau final en anglais, type: text }
+
+  - name: page_institut
+    label: Page L'institut
+    type: file
+    path: contenu/pages/institut.json
+    format: json
+    fields:
+      - { name: intro_titre, label: Titre de la page, type: string }
+      - { name: intro_texte, label: Introduction, type: text }
+      - { name: mission_titre, label: Titre de la mission, type: string }
+      - { name: mission, label: Mission, type: rich-text }
+      - { name: nom_titre, label: Titre de la partie sur le nom, type: string }
+      - { name: nom_texte, label: Origine et nom, type: rich-text }
+      - { name: demarche_titre, label: Titre de la démarche, type: string }
+      - { name: demarche_texte, label: Introduction de la démarche, type: text }
+      - name: etapes
+        label: Étapes de la démarche
+        type: object
+        list:
+          max: 6
+        fields:
+          - { name: titre, label: Titre, type: string }
+          - { name: texte, label: Texte, type: text }
+          - { name: titre_en, label: Titre en anglais, type: string }
+          - { name: texte_en, label: Texte en anglais, type: text }
+      - { name: gouvernance_titre, label: Titre de la gouvernance, type: string }
+      - { name: gouvernance, label: Gouvernance, type: rich-text }
+      - { name: intro_titre_en, label: Titre de la page en anglais, type: string }
+      - { name: intro_texte_en, label: Introduction en anglais, type: text }
+      - { name: mission_titre_en, label: Titre de la mission en anglais, type: string }
+      - { name: mission_en, label: Mission en anglais, type: rich-text }
+      - { name: nom_titre_en, label: Titre de la partie sur le nom en anglais, type: string }
+      - { name: nom_texte_en, label: Origine et nom en anglais, type: rich-text }
+      - { name: demarche_titre_en, label: Titre de la démarche en anglais, type: string }
+      - { name: demarche_texte_en, label: Introduction de la démarche en anglais, type: text }
+      - { name: gouvernance_titre_en, label: Titre de la gouvernance en anglais, type: string }
+      - { name: gouvernance_en, label: Gouvernance en anglais, type: rich-text }
+
+  - name: page_axes
+    label: Page Axes de travail
+    type: file
+    path: contenu/pages/axes.json
+    format: json
+    fields:
+      - { name: intro_titre, label: Titre de la page, type: string }
+      - { name: intro_texte, label: Introduction, type: text }
+      - name: axes
+        label: Axes
+        type: object
+        list:
+          max: 6
+        fields:
+          - { name: nom, label: Nom de l'axe, type: string }
+          - { name: accroche, label: Accroche, type: string }
+          - { name: texte, label: Présentation, type: text }
+          - { name: exemples, label: Travaux types, type: string, list: true }
+          - name: rubrique
+            label: Rubrique liée
+            type: select
+            options:
+              values:
+                - { name: publications, label: "Publications" }
+                - { name: indices, label: "Indices" }
+                - { name: actualites, label: "Actualités" }
+                - { name: mediatheque, label: "Médiathèque" }
+          - { name: nom_en, label: Nom en anglais, type: string }
+          - { name: accroche_en, label: Accroche en anglais, type: string }
+          - { name: texte_en, label: Présentation en anglais, type: text }
+          - { name: exemples_en, label: Travaux types en anglais, type: string, list: true }
+      - { name: intro_titre_en, label: Titre de la page en anglais, type: string }
+      - { name: intro_texte_en, label: Introduction en anglais, type: text }
+
+  - name: page_contact
+    label: Page Contact
+    type: file
+    path: contenu/pages/contact.json
+    format: json
+    fields:
+      - { name: intro_titre, label: Titre de la page, type: string }
+      - { name: intro_texte, label: Introduction, type: text }
+      - { name: intro_titre_en, label: Titre en anglais, type: string }
+      - { name: intro_texte_en, label: Introduction en anglais, type: text }
+
+  # ------------------------------------------------------------------
+  - name: reglages
+    label: Réglages du site
+    type: file
+    path: contenu/reglages.json
+    format: json
+    fields:
+      - { name: nom, label: Nom court, type: string }
+      - { name: nom_complet, label: Dénomination complète, type: string }
+      - { name: sigle, label: Sigle, type: string }
+      - { name: baseline, label: Signature, type: string }
+      - { name: description, label: Description pour les moteurs de recherche, type: text }
+      - { name: adresse, label: Adresse, type: string }
+      - name: telephones
+        label: Téléphones
+        type: string
+        list: true
+      - { name: courriel, label: Adresse électronique affichée, type: string }
+      - name: cle_formulaire
+        label: Clé du formulaire de contact
+        description: Clé gratuite fournie par web3forms.com. Les messages du formulaire arrivent alors dans votre messagerie.
+        type: string
+      - name: reseaux
+        label: Réseaux sociaux
+        description: Laissez vide un réseau que l'institut n'utilise pas.
+        type: object
+        fields:
+          - { name: linkedin, label: LinkedIn, type: string }
+          - { name: facebook, label: Facebook, type: string }
+          - { name: x, label: X (Twitter), type: string }
+          - { name: youtube, label: YouTube, type: string }
+      - { name: nom_complet_en, label: Dénomination en anglais, type: string }
+      - { name: baseline_en, label: Signature en anglais, type: string }
+      - { name: description_en, label: Description en anglais, type: text }
+      - { name: adresse_en, label: Adresse en anglais, type: string }
+      - { name: adresse_administration, label: Adresse de l'espace d'administration, type: string, hidden: true }

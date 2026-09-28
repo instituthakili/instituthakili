@@ -1,0 +1,54 @@
+---
+import Base from '../layouts/Base.astro';
+import Intro from '../components/Intro.astro';
+import Icone from '../components/Icone.astro';
+import { UI, route } from '../lib/i18n.js';
+import { contenus, url, tr, md, typo } from '../lib/content.js';
+
+interface Props { lang: 'fr' | 'en'; cle: string; slug?: string }
+const { lang, cle } = Astro.props;
+const t = UI[lang];
+const c = await contenus();
+const page = c.pages.axes;
+const alterne = url(route(cle, lang === 'fr' ? 'en' : 'fr'));
+const axes = page.axes || [];
+const liens: Record<string, string> = { publications: 'publications', indices: 'indices', actualites: 'actualites', mediatheque: 'mediatheque' };
+---
+<Base lang={lang} cle={cle} alterne={alterne} titre={t.nav.axes} description={tr(page, 'intro_texte', lang)}>
+  <Intro
+    surtitre={lang === 'fr' ? 'Programme 2026-2029' : '2026-2029 programme'}
+    titre={tr(page, 'intro_titre', lang)}
+    texte={tr(page, 'intro_texte', lang)}
+    fil={[{ libelle: t.nav.accueil, lien: url(route('accueil', lang)) }, { libelle: t.nav.axes }]}
+  />
+  <section class="section">
+    <div class="conteneur pile" style="gap:0">
+      {axes.map((a: any, n: number) => {
+        const exemples = (lang === 'en' && a.exemples_en?.length ? a.exemples_en : a.exemples) || [];
+        return (
+          <article class="grille-2" style={`padding-block:clamp(36px,5vw,64px);${n > 0 ? 'border-top:1px solid var(--filet)' : 'border-top:1px solid var(--encre)'}`} id={`axe-${n + 1}`}>
+            <div class="pile" style="gap:14px">
+              <span class="axe__num">{t.axe} {n + 1}</span>
+              <h2 style="font-size:clamp(1.7rem,1.3rem + 1.4vw,2.3rem)">{tr(a, 'nom', lang)}</h2>
+              <p class="axe__accroche" style="font-size:1.05rem">{tr(a, 'accroche', lang)}</p>
+            </div>
+            <div class="pile" style="gap:22px">
+              <div class="prose" set:html={md(tr(a, 'texte', lang))} />
+              {exemples.length > 0 && (
+                <div class="pile" style="gap:10px">
+                  <h3 class="surtitre" style="font-family:var(--f-ui);font-size:var(--t-xs)">{lang === 'fr' ? 'Travaux types' : 'Typical outputs'}</h3>
+                  <ul class="prose" style="font-size:1.05rem;color:var(--encre-2);margin:0">
+                    {exemples.map((x: string) => <li>{typo(x)}</li>)}
+                  </ul>
+                </div>
+              )}
+              {a.rubrique && liens[a.rubrique] && (
+                <a class="lien-fleche" href={url(route(liens[a.rubrique], lang))}>{t.nav[liens[a.rubrique]]}<Icone nom="fleche-droite" /></a>
+              )}
+            </div>
+          </article>
+        );
+      })}
+    </div>
+  </section>
+</Base>

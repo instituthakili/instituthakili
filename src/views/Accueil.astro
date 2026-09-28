@@ -1,0 +1,207 @@
+---
+import Base from '../layouts/Base.astro';
+import Anneaux from '../components/Anneaux.astro';
+import Logo from '../components/Logo.astro';
+import Icone from '../components/Icone.astro';
+import LignePublication from '../components/LignePublication.astro';
+import CarteIndice from '../components/CarteIndice.astro';
+import CarteActualite from '../components/CarteActualite.astro';
+import LigneEvenement from '../components/LigneEvenement.astro';
+import CarteVideo from '../components/CarteVideo.astro';
+import { UI, route, libelle } from '../lib/i18n.js';
+import { contenus, url, tr, md, media, typo } from '../lib/content.js';
+import { extrait } from '../lib/format.js';
+
+interface Props { lang: 'fr' | 'en'; cle: string; slug?: string }
+const { lang, cle } = Astro.props;
+const t = UI[lang];
+const c = await contenus();
+const page = c.pages.accueil;
+const axesPage = c.pages.axes;
+
+const misesEnAvant = c.publications.filter((p) => p.data.en_avant);
+const publications = [...misesEnAvant, ...c.publications.filter((p) => !p.data.en_avant)].slice(0, 5);
+const derniere = c.publications[0];
+const derniereActu = c.actualites[0];
+const prochain = c.aVenir[0];
+const directeur = c.equipe.find((m) => m.data.groupe === 'direction');
+const axes = (axesPage.axes || []).slice(0, 4);
+const expertises = directeur ? ((lang === 'en' && directeur.data.expertises_en?.length ? directeur.data.expertises_en : directeur.data.expertises) || []) : [];
+const alterne = url(route(cle, lang === 'fr' ? 'en' : 'fr'));
+
+// Trois entrées du registre affichées sous l'ouverture : dernière publication, dernière actualité, prochain rendez-vous.
+const registre = [
+  derniere && { rubrique: t.nav.publications, titre: tr(derniere.data, 'titre', lang), lien: url(route('publication', lang, derniere.slug)) },
+  derniereActu && { rubrique: t.actualites, titre: tr(derniereActu.data, 'titre', lang), lien: url(route('actualite', lang, derniereActu.slug)) },
+  prochain
+    ? { rubrique: t.agenda, titre: tr(prochain.data, 'titre', lang), lien: url(route('evenement', lang, prochain.slug)) }
+    : c.indices[0] && { rubrique: t.nav.indices, titre: tr(c.indices[0].data, 'nom', lang), lien: url(route('indice', lang, c.indices[0].slug)) },
+].filter(Boolean);
+---
+<Base lang={lang} cle={cle} alterne={alterne} description={tr(page, 'texte', lang) ? extrait(tr(page, 'texte', lang), 160) : undefined}>
+  <section class="ouverture">
+    <div class="conteneur">
+      <div class="ouverture__grille">
+        <div>
+          <p class="surtitre">{tr(page, 'surtitre', lang)}</p>
+          <h1>{tr(page, 'titre', lang)}</h1>
+          <p class="ouverture__texte">{tr(page, 'texte', lang)}</p>
+          <div class="ouverture__actions">
+            <a class="bouton bouton--clair" href={url(route('publications', lang))}>{lang === 'fr' ? 'Consulter les publications' : 'Browse publications'}<Icone nom="fleche-droite" /></a>
+            <a class="bouton bouton--contour-clair" href={url(route('indices', lang))}>{lang === 'fr' ? 'Découvrir les indices HAKILI' : 'Discover the HAKILI indices'}</a>
+          </div>
+        </div>
+        <div class="ouverture__visuel">
+          <Anneaux />
+        </div>
+      </div>
+      {registre.length > 0 && (
+        <div class="ouverture__registre">
+          {registre.map((r: any) => (
+            <a class="ouverture__entree" href={r.lien}>
+              <span>{r.rubrique}</span>
+              <strong>{r.titre}</strong>
+            </a>
+          ))}
+        </div>
+      )}
+    </div>
+  </section>
+
+  {c.publications.length > 0 && (
+    <section class="section">
+      <div class="conteneur">
+        <div class="tete-section">
+          <div class="tete-section__texte">
+            <p class="surtitre">{t.introRegistre}</p>
+            <h2>{t.publicationsRecentes}</h2>
+          </div>
+          <a class="lien-fleche" href={url(route('publications', lang))}>{t.toutesPublications}<Icone nom="fleche-droite" /></a>
+        </div>
+        <ul class="registre">
+          {publications.map((p) => <LignePublication p={p} lang={lang} />)}
+        </ul>
+      </div>
+    </section>
+  )}
+
+  {c.indices.length > 0 && (
+    <section class="section section--teinte">
+      <div class="conteneur">
+        <div class="tete-section">
+          <div class="tete-section__texte">
+            <p class="surtitre">{lang === 'fr' ? 'Mesurer' : 'Measuring'}</p>
+            <h2>{tr(page, 'indices_titre', lang)}</h2>
+            <p>{tr(page, 'indices_texte', lang)}</p>
+          </div>
+          <a class="lien-fleche" href={url(route('indices', lang))}>{t.tousIndices}<Icone nom="fleche-droite" /></a>
+        </div>
+        <div class="indices">
+          {c.indices.map((i) => <CarteIndice i={i} lang={lang} />)}
+        </div>
+      </div>
+    </section>
+  )}
+
+  {axes.length > 0 && (
+    <section class="section">
+      <div class="conteneur">
+        <div class="tete-section">
+          <div class="tete-section__texte">
+            <p class="surtitre">{t.nav.axes}</p>
+            <h2>{tr(page, 'axes_titre', lang)}</h2>
+            <p>{tr(page, 'axes_texte', lang)}</p>
+          </div>
+          <a class="lien-fleche" href={url(route('axes', lang))}>{t.enSavoirPlus}<Icone nom="fleche-droite" /></a>
+        </div>
+        <div class="axes">
+          {axes.map((a: any, n: number) => (
+            <article class="axe">
+              <span class="axe__num">{t.axe} {n + 1}</span>
+              <h3>{tr(a, 'nom', lang)}</h3>
+              <p class="axe__accroche">{tr(a, 'accroche', lang)}</p>
+              <p class="axe__texte">{extrait(tr(a, 'texte', lang), 230)}</p>
+            </article>
+          ))}
+        </div>
+      </div>
+    </section>
+  )}
+
+  {(c.actualites.length > 0 || c.aVenir.length > 0) && (
+    <section class="section section--blanche">
+      <div class="conteneur">
+        <div class="tete-section">
+          <div class="tete-section__texte">
+            <p class="surtitre">{lang === 'fr' ? "La vie de l’institut" : 'Institute life'}</p>
+            <h2>{t.actualites}</h2>
+          </div>
+          <a class="lien-fleche" href={url(route('actualites', lang))}>{t.toutesActualites}<Icone nom="fleche-droite" /></a>
+        </div>
+        <div class="fil">
+          {c.actualites.slice(0, 3).map((a) => <CarteActualite a={a} lang={lang} />)}
+        </div>
+        {c.aVenir.length > 0 && (
+          <div style="margin-top:56px">
+            <h3 class="surtitre" style="font-family:var(--f-ui);font-size:var(--t-xs)">{t.agenda}</h3>
+            <ul class="agenda">
+              {c.aVenir.slice(0, 3).map((e) => <LigneEvenement e={e} lang={lang} />)}
+            </ul>
+          </div>
+        )}
+      </div>
+    </section>
+  )}
+
+  {c.videos.length > 0 && (
+    <section class="section">
+      <div class="conteneur">
+        <div class="tete-section">
+          <div class="tete-section__texte">
+            <p class="surtitre">{t.nav.mediatheque}</p>
+            <h2>{lang === 'fr' ? 'Conférences et entretiens' : 'Conferences and interviews'}</h2>
+          </div>
+          <a class="lien-fleche" href={url(route('mediatheque', lang))}>{t.toutesVideos}<Icone nom="fleche-droite" /></a>
+        </div>
+        <div class="videos">
+          {c.videos.slice(0, 3).map((v) => <CarteVideo v={v} lang={lang} />)}
+        </div>
+      </div>
+    </section>
+  )}
+
+  {directeur && (
+    <section class="section section--teinte">
+      <div class="conteneur direction">
+        <div class="direction__nom">
+          <p class="surtitre">{lang === 'fr' ? 'Direction' : 'Management'}</p>
+          {media(directeur.data.photo) && <img class="direction__portrait" src={media(directeur.data.photo)} alt={directeur.data.nom} loading="lazy" />}
+          <h2>{directeur.data.nom}</h2>
+          <p class="direction__fonction">{tr(directeur.data, 'fonction', lang)}</p>
+          {expertises.length > 0 && (
+            <ul class="etiquettes" style="margin-top:12px" aria-label={lang === 'fr' ? 'Domaines d’expertise' : 'Areas of expertise'}>
+              {expertises.map((x: string) => <li><span class="pastille pastille--contour" style="font-size:.85rem;padding:6px 12px">{typo(x)}</span></li>)}
+            </ul>
+          )}
+        </div>
+        <div class="direction__bio">
+          <div class="prose" style="font-size:1.12rem;color:var(--encre-2)" set:html={md(tr(directeur.data, 'bio', lang))} />
+          <a class="lien-fleche" href={url(route('institut', lang)) + '#direction'}>{lang === 'fr' ? "Découvrir l’institut et sa gouvernance" : 'The Institute and its governance'}<Icone nom="fleche-droite" /></a>
+        </div>
+      </div>
+    </section>
+  )}
+
+  <section class="section section--serree">
+    <div class="conteneur">
+      <div class="appel">
+        <div>
+          <h2>{tr(page, 'appel_titre', lang)}</h2>
+          <p>{tr(page, 'appel_texte', lang)}</p>
+        </div>
+        <a class="bouton bouton--clair" href={url(route('contact', lang))}>{t.ecrire}<Icone nom="fleche-droite" /></a>
+        <div class="appel__motif" aria-hidden="true"><Logo symboleSeul /></div>
+      </div>
+    </div>
+  </section>
+</Base>

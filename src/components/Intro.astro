@@ -1,0 +1,32 @@
+---
+import Logo from './Logo.astro';
+interface Props {
+  surtitre?: string;
+  titre: string;
+  texte?: string;
+  fil?: { libelle: string; lien?: string }[];
+  langueTitre?: string;
+}
+const { surtitre, titre, texte, fil = [], langueTitre } = Astro.props;
+---
+<section class="intro">
+  <div class="intro__motif" aria-hidden="true"><Logo symboleSeul /></div>
+  <div class="conteneur">
+    <div class="intro__corps">
+      {fil.length > 0 && (
+        <nav class="intro__fil" aria-label="Fil d’Ariane">
+          {fil.map((f, i) => (
+            <>
+              {f.lien ? <a href={f.lien}>{f.libelle}</a> : <span aria-current="page">{f.libelle}</span>}
+              {i < fil.length - 1 && <span aria-hidden="true">/</span>}
+            </>
+          ))}
+        </nav>
+      )}
+      {surtitre && <p class="surtitre">{surtitre}</p>}
+      <h1 lang={langueTitre}>{titre}</h1>
+      {texte && <p class="chapo">{texte}</p>}
+      <slot />
+    </div>
+  </div>
+</section>

@@ -1,0 +1,69 @@
+---
+import Logo from './Logo.astro';
+import { UI, route } from '../lib/i18n.js';
+import { contenus, url, tr } from '../lib/content.js';
+
+interface Props { lang: 'fr' | 'en'; alterne: string }
+const { lang, alterne } = Astro.props;
+const t = UI[lang];
+const { reglages } = await contenus();
+const annee = new Date().getFullYear();
+const tels = (reglages.telephones || []).filter(Boolean);
+const reseaux = reglages.reseaux || {};
+const liensReseaux = [
+  ['LinkedIn', reseaux.linkedin],
+  ['Facebook', reseaux.facebook],
+  ['X', reseaux.x],
+  ['YouTube', reseaux.youtube],
+].filter(([, lien]) => lien);
+const administration = reglages.adresse_administration || 'https://app.pagescms.org';
+---
+<footer class="pied">
+  <div class="conteneur">
+    <div class="pied__grille">
+      <div class="pied__marque">
+        <a href={url(route('accueil', lang))} aria-label={lang === 'fr' ? "Institut HAKILI, page d’accueil" : 'HAKILI Institute, home page'}>
+          <Logo titre={lang === 'fr' ? 'Institut HAKILI' : 'HAKILI Institute'} />
+        </a>
+        <p class="pied__baseline">{tr(reglages, 'baseline', lang)}</p>
+        <p class="pied__nom">{tr(reglages, 'nom_complet', lang)}{reglages.sigle ? ` (${reglages.sigle})` : ''}</p>
+      </div>
+      <div>
+        <h2>{lang === 'fr' ? "L’institut" : 'The Institute'}</h2>
+        <ul>
+          <li><a href={url(route('institut', lang))}>{t.nav.institut}</a></li>
+          <li><a href={url(route('axes', lang))}>{t.nav.axes}</a></li>
+          <li><a href={url(route('indices', lang))}>{t.nav.indices}</a></li>
+          <li><a href={url(route('contact', lang))}>{t.nav.contact}</a></li>
+        </ul>
+      </div>
+      <div>
+        <h2>{lang === 'fr' ? 'Travaux' : 'Work'}</h2>
+        <ul>
+          <li><a href={url(route('publications', lang))}>{t.nav.publications}</a></li>
+          <li><a href={url(route('mediatheque', lang))}>{t.nav.mediatheque}</a></li>
+          <li><a href={url(route('actualites', lang))}>{t.nav.actualites}</a></li>
+          {liensReseaux.map(([nom, lien]) => (
+            <li><a href={lien} rel="noopener" target="_blank">{nom}</a></li>
+          ))}
+        </ul>
+      </div>
+      <div>
+        <h2>{t.coordonnees}</h2>
+        <address>
+          <span>{tr(reglages, 'adresse', lang)}</span>
+          {tels.map((tel) => <a href={`tel:${tel.replace(/[^+\d]/g, '')}`}>{tel}</a>)}
+          {reglages.courriel && <a href={`mailto:${reglages.courriel}`}>{reglages.courriel}</a>}
+        </address>
+      </div>
+    </div>
+    <div class="pied__bas">
+      <p>{t.droits(annee)}</p>
+      <ul>
+        <li><a href={url(route('mentions', lang))}>{t.nav.mentions}</a></li>
+        <li><a href={administration} rel="noopener" target="_blank">{t.administration}</a></li>
+        <li><a href={alterne} hreflang={lang === 'fr' ? 'en' : 'fr'} lang={lang === 'fr' ? 'en' : 'fr'}>{t.autreLangue}</a></li>
+      </ul>
+    </div>
+  </div>
+</footer>

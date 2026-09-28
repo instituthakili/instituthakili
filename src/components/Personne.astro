@@ -1,0 +1,16 @@
+---
+import { tr, media, typo } from '../lib/content.js';
+interface Props { m: any; lang: 'fr' | 'en' }
+const { m, lang } = Astro.props;
+const nom = String(m.data.nom || '');
+const mots = nom.replace(/^(Dr|Pr|Pre|M\.|Mme|Me)\s+/i, '').split(/\s+/).filter(Boolean);
+const initiales = (mots.length > 1 ? mots[0][0] + mots[mots.length - 1][0] : (mots[0] || '').slice(0, 2)).toUpperCase();
+const photo = media(m.data.photo);
+---
+<li class="personne">
+  {photo ? <img src={photo} alt="" loading="lazy" /> : <span class="personne__initiales" aria-hidden="true">{initiales}</span>}
+  <div>
+    <h3>{typo(nom)}</h3>
+    {tr(m.data, 'fonction', lang) && <p>{tr(m.data, 'fonction', lang)}</p>}
+  </div>
+</li>

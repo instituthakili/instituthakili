@@ -1,0 +1,54 @@
+---
+import Base from '../layouts/Base.astro';
+import Intro from '../components/Intro.astro';
+import Icone from '../components/Icone.astro';
+import { UI, route, libelle } from '../lib/i18n.js';
+import { contenus, url, tr, md, seulementFr } from '../lib/content.js';
+import { dateLongue, heure, extrait } from '../lib/format.js';
+
+interface Props { lang: 'fr' | 'en'; cle: string; slug: string }
+const { lang, cle, slug } = Astro.props;
+const t = UI[lang];
+const c = await contenus();
+const e = c.agenda.find((x) => x.slug === slug);
+const alterne = url(route(cle, lang === 'fr' ? 'en' : 'fr', slug));
+const quand = [dateLongue(e.debut, lang), heure(e.debut, lang)].filter(Boolean).join(lang === 'fr' ? ', ' : ', ');
+const fin = e.fin ? [dateLongue(e.fin, lang), heure(e.fin, lang)].filter(Boolean).join(', ') : '';
+const description = tr(e.data, 'description', lang);
+const jsonld = {
+  '@context': 'https://schema.org',
+  '@type': 'Event',
+  name: e.data.titre,
+  startDate: e.debut?.toISOString(),
+  endDate: e.fin?.toISOString(),
+  eventAttendanceMode: e.data.format === 'en-ligne' ? 'https://schema.org/OnlineEventAttendanceMode' : e.data.format === 'hybride' ? 'https://schema.org/MixedEventAttendanceMode' : 'https://schema.org/OfflineEventAttendanceMode',
+  location: e.data.lieu ? { '@type': 'Place', name: e.data.lieu } : undefined,
+  organizer: { '@type': 'Organization', name: 'Institut HAKILI' },
+};
+---
+<Base lang={lang} cle={cle} alterne={alterne} titre={tr(e.data, 'titre', lang)} description={extrait(description, 160)} jsonld={jsonld}>
+  <Intro
+    surtitre={t.agenda}
+    titre={tr(e.data, 'titre', lang)}
+    langueTitre={seulementFr(e.data, 'titre', lang) ? 'fr' : undefined}
+    fil={[{ libelle: t.nav.accueil, lien: url(route('accueil', lang)) }, { libelle: t.nav.actualites, lien: url(route('actualites', lang)) }, { libelle: extrait(tr(e.data, 'titre', lang), 48) }]}
+  />
+  <section class="section">
+    <div class="conteneur colonnes">
+      <div class="pile" style="gap:24px">
+        {description && <div class="prose" lang={seulementFr(e.data, 'description', lang) ? 'fr' : undefined} set:html={md(description)} />}
+        <a class="retour" href={url(route('actualites', lang)) + '#agenda'}><Icone nom="fleche-gauche" />{t.retourActualites}</a>
+      </div>
+      <aside class="colonne-collante">
+        <div class="encadre">
+          <dl class="fiche">
+            <dt>{t.horaire}</dt><dd>{quand}{fin && <><br />{fin}</>}</dd>
+            {tr(e.data, 'lieu', lang) && (<><dt>{t.lieu}</dt><dd>{tr(e.data, 'lieu', lang)}</dd></>)}
+            {e.data.format && (<><dt>{t.format}</dt><dd>{libelle('formatsEvenement', e.data.format, lang)}</dd></>)}
+          </dl>
+          {e.data.lien_inscription && <a class="bouton bouton--plein bouton--large" href={e.data.lien_inscription} target="_blank" rel="noopener">{t.inscription}<Icone nom="externe" /></a>}
+        </div>
+      </aside>
+    </div>
+  </section>
+</Base>

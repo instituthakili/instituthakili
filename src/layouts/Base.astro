@@ -1,0 +1,88 @@
+---
+import '../styles/global.css';
+import policeTitres from '../assets/fonts/adventor-bold.woff2?url';
+import policeTexte from '../assets/fonts/newsreader.woff2?url';
+import policeUi from '../assets/fonts/figtree.woff2?url';
+import Entete from '../components/Entete.astro';
+import Pied from '../components/Pied.astro';
+import { UI } from '../lib/i18n.js';
+import { contenus, url, tr } from '../lib/content.js';
+
+interface Props {
+  lang: 'fr' | 'en';
+  titre?: string;
+  description?: string;
+  cle?: string;
+  alterne?: string;
+  image?: string;
+  type?: 'website' | 'article';
+  jsonld?: Record<string, unknown> | Record<string, unknown>[];
+  corpsClasse?: string;
+}
+
+const { lang, titre, description, cle = '', alterne, image, type = 'website', jsonld, corpsClasse = '' } = Astro.props;
+const { reglages } = await contenus();
+const t = UI[lang];
+
+const nomSite = lang === 'en' ? 'HAKILI Institute' : 'Institut HAKILI';
+const titreComplet = titre ? `${titre} | ${nomSite}` : `${nomSite} | ${tr(reglages, 'baseline', lang)}`;
+const desc = description || tr(reglages, 'description', lang) || tr(reglages, 'nom_complet', lang);
+
+const site = Astro.site ? Astro.site.toString().replace(/\/$/, '') : '';
+const canonique = site + Astro.url.pathname;
+const cheminAutre = alterne || url(lang === 'fr' ? '/en/' : '/');
+const pageFr = lang === 'fr' ? Astro.url.pathname : cheminAutre;
+const pageEn = lang === 'en' ? Astro.url.pathname : cheminAutre;
+const imageSociale = image ? (image.startsWith('http') ? image : site + image) : site + url('/og-image.png');
+
+const organisation = {
+  '@context': 'https://schema.org',
+  '@type': 'ResearchOrganization',
+  name: reglages.nom_complet || 'Institut HAKILI pour la Gouvernance et la Redevabilité en Afrique',
+  alternateName: [reglages.nom || 'Institut HAKILI', reglages.sigle || 'IHGR', reglages.nom_complet_en].filter(Boolean),
+  url: site + url('/'),
+  logo: site + url('/favicon.svg'),
+  email: reglages.courriel || undefined,
+  telephone: (reglages.telephones || [])[0] || undefined,
+  address: { '@type': 'PostalAddress', addressLocality: 'Bamako', addressCountry: 'ML' },
+};
+const donneesStructurees = [organisation, ...(Array.isArray(jsonld) ? jsonld : jsonld ? [jsonld] : [])];
+---
+<!doctype html>
+<html lang={lang}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>{titreComplet}</title>
+    <meta name="description" content={desc} />
+    <link rel="canonical" href={canonique} />
+    <link rel="alternate" hreflang="fr" href={site + pageFr} />
+    <link rel="alternate" hreflang="en" href={site + pageEn} />
+    <link rel="alternate" hreflang="x-default" href={site + pageFr} />
+    <meta name="theme-color" content="#0f4a39" />
+    <link rel="icon" href={url('/favicon.svg')} type="image/svg+xml" />
+    <link rel="icon" href={url('/favicon-32.png')} sizes="32x32" type="image/png" />
+    <link rel="apple-touch-icon" href={url('/apple-touch-icon.png')} />
+    <link rel="alternate" type="application/rss+xml" title="Institut HAKILI" href={url('/rss.xml')} />
+    <link rel="preload" href={policeTitres} as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href={policeTexte} as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href={policeUi} as="font" type="font/woff2" crossorigin />
+    <meta property="og:site_name" content={nomSite} />
+    <meta property="og:type" content={type} />
+    <meta property="og:title" content={titre || nomSite} />
+    <meta property="og:description" content={desc} />
+    <meta property="og:url" content={canonique} />
+    <meta property="og:image" content={imageSociale} />
+    <meta property="og:locale" content={lang === 'fr' ? 'fr_FR' : 'en_GB'} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <script type="application/ld+json" set:html={JSON.stringify(donneesStructurees)} />
+  </head>
+  <body class={corpsClasse}>
+    <a class="lien-evitement" href="#contenu">{t.lienEvitement}</a>
+    <Entete lang={lang} cle={cle} alterne={cheminAutre} />
+    <main id="contenu" tabindex="-1">
+      <slot />
+    </main>
+    <Pied lang={lang} alterne={cheminAutre} />
+  </body>
+</html>

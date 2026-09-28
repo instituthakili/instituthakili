@@ -1,0 +1,26 @@
+---
+import { UI, libelle, route } from '../lib/i18n.js';
+import { url, tr, seulementFr } from '../lib/content.js';
+import { heure } from '../lib/format.js';
+interface Props { e: any; lang: 'fr' | 'en' }
+const { e, lang } = Astro.props;
+const t = UI[lang];
+const d = e.debut;
+const h = heure(d, lang);
+---
+<li>
+  <a class="evenement" href={url(route('evenement', lang, e.slug))}>
+    <span class="evenement__date" aria-hidden="true">
+      <span class="evenement__jour">{d.getUTCDate()}</span>
+      <span class="evenement__mois">{t.moisCourts[d.getUTCMonth()]}</span>
+      <span class="evenement__mois" style="font-weight:600;letter-spacing:.04em">{d.getUTCFullYear()}</span>
+    </span>
+    <span>
+      <h3 lang={seulementFr(e.data, 'titre', lang) ? 'fr' : undefined}>{tr(e.data, 'titre', lang)}</h3>
+      <p class="meta">
+        <span class="visuellement-cache">{d.getUTCDate()} {t.mois[d.getUTCMonth()]} {d.getUTCFullYear()}. </span>
+        {[h, tr(e.data, 'lieu', lang), e.data.format ? libelle('formatsEvenement', e.data.format, lang) : ''].filter(Boolean).join(' · ')}
+      </p>
+    </span>
+  </a>
+</li>

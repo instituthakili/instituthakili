@@ -1,0 +1,69 @@
+---
+import Base from '../layouts/Base.astro';
+import Intro from '../components/Intro.astro';
+import Icone from '../components/Icone.astro';
+import Logo from '../components/Logo.astro';
+import { UI, route, libelle } from '../lib/i18n.js';
+import { contenus, url, tr, md, media, videoSource, seulementFr } from '../lib/content.js';
+import { moisAnnee, extrait } from '../lib/format.js';
+
+interface Props { lang: 'fr' | 'en'; cle: string; slug: string }
+const { lang, cle, slug } = Astro.props;
+const t = UI[lang];
+const c = await contenus();
+const v = c.videos.find((x) => x.slug === slug);
+const alterne = url(route(cle, lang === 'fr' ? 'en' : 'fr', slug));
+const src = videoSource(v);
+const affiche = media(v.data.affiche) || (src?.type === 'youtube' ? `https://i.ytimg.com/vi/${src.id}/maxresdefault.jpg` : '');
+const embed = src?.type === 'youtube'
+  ? `https://www.youtube-nocookie.com/embed/${src.id}?autoplay=1&rel=0`
+  : src?.type === 'vimeo'
+    ? `https://player.vimeo.com/video/${src.id}?autoplay=1&dnt=1`
+    : '';
+const description = tr(v.data, 'description', lang);
+---
+<Base lang={lang} cle={cle} alterne={alterne} titre={tr(v.data, 'titre', lang)} description={extrait(description, 160)} image={affiche && affiche.startsWith('http') ? affiche : undefined}>
+  <Intro
+    surtitre={v.data.format ? libelle('formatsVideo', v.data.format, lang) : t.nav.mediatheque}
+    titre={tr(v.data, 'titre', lang)}
+    langueTitre={seulementFr(v.data, 'titre', lang) ? 'fr' : undefined}
+    fil={[{ libelle: t.nav.accueil, lien: url(route('accueil', lang)) }, { libelle: t.nav.mediatheque, lien: url(route('mediatheque', lang)) }, { libelle: extrait(tr(v.data, 'titre', lang), 48) }]}
+  >
+    <p class="meta">{[moisAnnee(v.date, lang), v.data.duree].filter(Boolean).join(' · ')}</p>
+  </Intro>
+  <section class="section">
+    <div class="conteneur pile" style="gap:32px;max-width:1000px">
+      {src?.type === 'fichier' ? (
+        <div class="lecteur"><video controls preload="metadata" poster={affiche || undefined} src={src.fichier}></video></div>
+      ) : embed ? (
+        <div class="lecteur" data-lecteur data-embed={embed} data-titre={tr(v.data, 'titre', lang)}>
+          <button type="button" aria-label={t.lecture}>
+            <span class="vignette" style="position:absolute;inset:0;border-radius:0"><Logo symboleSeul /></span>
+            {affiche && <img src={affiche} alt="" style="position:absolute;inset:0" onerror="this.remove()" />}
+            <span class="vignette__lecture"><Icone nom="lecture" /></span>
+          </button>
+        </div>
+      ) : null}
+      {src?.lien && (
+        <a class="lien-fleche" href={src.lien} target="_blank" rel="noopener">{src.type === 'vimeo' ? t.voirVimeo : t.voirYoutube}<Icone nom="externe" /></a>
+      )}
+      {description && <div class="prose" lang={seulementFr(v.data, 'description', lang) ? 'fr' : undefined} set:html={md(description)} />}
+      <a class="retour" href={url(route('mediatheque', lang))}><Icone nom="fleche-gauche" />{t.retourMediatheque}</a>
+    </div>
+  </section>
+</Base>
+
+<script>
+  document.querySelectorAll('[data-lecteur]').forEach((bloc) => {
+    const bouton = bloc.querySelector('button');
+    bouton?.addEventListener('click', () => {
+      const iframe = document.createElement('iframe');
+      iframe.src = bloc.getAttribute('data-embed') || '';
+      iframe.title = bloc.getAttribute('data-titre') || '';
+      iframe.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share';
+      iframe.allowFullscreen = true;
+      iframe.referrerPolicy = 'strict-origin-when-cross-origin';
+      bloc.replaceChildren(iframe);
+    });
+  });
+</script>

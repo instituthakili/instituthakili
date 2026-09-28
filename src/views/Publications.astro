@@ -1,0 +1,98 @@
+---
+import Base from '../layouts/Base.astro';
+import Intro from '../components/Intro.astro';
+import LignePublication from '../components/LignePublication.astro';
+import { UI, route, LIBELLES, libelle } from '../lib/i18n.js';
+import { contenus, url } from '../lib/content.js';
+
+interface Props { lang: 'fr' | 'en'; cle: string; slug?: string }
+const { lang, cle } = Astro.props;
+const t = UI[lang];
+const c = await contenus();
+const alterne = url(route(cle, lang === 'fr' ? 'en' : 'fr'));
+const pubs = c.publications;
+const types = [...new Set(pubs.map((p) => p.type))].filter(Boolean);
+const themes = [...new Set(pubs.flatMap((p) => p.themes))].filter(Boolean);
+const annees = [...new Set(pubs.map((p) => (p.date ? p.date.getUTCFullYear() : null)).filter(Boolean))].sort((a, b) => b - a);
+const intro = lang === 'fr'
+  ? "Notes d’analyse, études, rapports, articles scientifiques et ouvrages de l’institut et de ses chercheurs. Les documents disponibles se téléchargent librement."
+  : "Analytical notes, studies, reports, journal articles and books by the Institute and its researchers. Available documents can be downloaded freely.";
+---
+<Base lang={lang} cle={cle} alterne={alterne} titre={t.nav.publications} description={intro}>
+  <Intro
+    surtitre={t.introRegistre}
+    titre={t.nav.publications}
+    texte={intro}
+    fil={[{ libelle: t.nav.accueil, lien: url(route('accueil', lang)) }, { libelle: t.nav.publications }]}
+  />
+  <section class="section">
+    <div class="conteneur">
+      <form class="filtres" role="search" aria-label={t.filtrer} data-filtres onsubmit="return false">
+        <div class="champ">
+          <label for="filtre-texte">{t.rechercher}</label>
+          <input id="filtre-texte" type="search" placeholder={t.rechercherPlaceholder} autocomplete="off" data-filtre="texte" />
+        </div>
+        <div class="champ">
+          <label for="filtre-type">{t.type}</label>
+          <select id="filtre-type" data-filtre="type">
+            <option value="">{t.tousTypes}</option>
+            {types.map((x) => <option value={x}>{libelle('typesPublication', x, lang)}</option>)}
+          </select>
+        </div>
+        <div class="champ">
+          <label for="filtre-theme">{t.theme}</label>
+          <select id="filtre-theme" data-filtre="theme">
+            <option value="">{t.tousThemes}</option>
+            {themes.map((x) => <option value={x}>{libelle('themes', x, lang)}</option>)}
+          </select>
+        </div>
+        <div class="champ">
+          <label for="filtre-annee">{t.date}</label>
+          <select id="filtre-annee" data-filtre="annee">
+            <option value="">{t.toutesAnnees}</option>
+            {annees.map((x) => <option value={x}>{x}</option>)}
+          </select>
+        </div>
+        <button class="filtres__reset" type="reset" data-reinitialiser>{t.reinitialiser}</button>
+      </form>
+      <p class="filtres__compte" aria-live="polite" data-compte data-libelles={JSON.stringify({ un: t.resultats(1), zero: t.resultats(0), plusieurs: t.resultats(2).replace('2', '{n}') })}>{t.resultats(pubs.length)}</p>
+      <ul class="registre" data-liste>
+        {pubs.map((p) => <LignePublication p={p} lang={lang} niveauTitre="h2" />)}
+      </ul>
+      <p class="vide" hidden data-aucun>{t.aucunePublication}</p>
+    </div>
+  </section>
+</Base>
+
+<script>
+  const form = document.querySelector('[data-filtres]');
+  const lignes = Array.from(document.querySelectorAll('[data-publication]'));
+  const compte = document.querySelector('[data-compte]');
+  const aucun = document.querySelector('[data-aucun]');
+  if (form && lignes.length) {
+    const libelles = JSON.parse(compte?.getAttribute('data-libelles') || '{}');
+    const normaliser = (s) => (s || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[\u2018\u2019]/g, "'").replace(/\u2060/g, '');
+    const lire = (nom) => form.querySelector(`[data-filtre="${nom}"]`)?.value || '';
+    const appliquer = () => {
+      const texte = normaliser(lire('texte')).trim();
+      const type = lire('type');
+      const theme = lire('theme');
+      const annee = lire('annee');
+      let n = 0;
+      lignes.forEach((l) => {
+        const ok =
+          (!texte || normaliser(l.dataset.texte).includes(texte)) &&
+          (!type || l.dataset.type === type) &&
+          (!theme || (l.dataset.themes || '').split(' ').includes(theme)) &&
+          (!annee || l.dataset.annee === annee);
+        l.hidden = !ok;
+        if (ok) n++;
+      });
+      if (compte) compte.textContent = n === 0 ? libelles.zero : n === 1 ? libelles.un : (libelles.plusieurs || '').replace('{n}', String(n));
+      if (aucun) aucun.hidden = n !== 0;
+    };
+    form.addEventListener('input', appliquer);
+    form.addEventListener('change', appliquer);
+    form.addEventListener('reset', () => setTimeout(appliquer, 0));
+  }
+</script>

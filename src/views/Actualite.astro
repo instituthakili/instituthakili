@@ -1,0 +1,55 @@
+---
+import Base from '../layouts/Base.astro';
+import Intro from '../components/Intro.astro';
+import Icone from '../components/Icone.astro';
+import CarteActualite from '../components/CarteActualite.astro';
+import { UI, route, libelle } from '../lib/i18n.js';
+import { contenus, url, tr, md, media, seulementFr } from '../lib/content.js';
+import { dateAffichee, extrait, isoDate } from '../lib/format.js';
+
+interface Props { lang: 'fr' | 'en'; cle: string; slug: string }
+const { lang, cle, slug } = Astro.props;
+const t = UI[lang];
+const c = await contenus();
+const a = c.actualites.find((x) => x.slug === slug);
+const alterne = url(route(cle, lang === 'fr' ? 'en' : 'fr', slug));
+const image = media(a.data.image);
+const corps = lang === 'en' && a.data.corps_en ? md(a.data.corps_en) : a.html;
+const corpsFr = lang === 'en' && !a.data.corps_en && a.html;
+const autres = c.actualites.filter((x) => x.slug !== slug).slice(0, 3);
+const jsonld = {
+  '@context': 'https://schema.org',
+  '@type': 'NewsArticle',
+  headline: a.data.titre,
+  datePublished: a.date ? isoDate(a.date) : undefined,
+  publisher: { '@type': 'Organization', name: 'Institut HAKILI' },
+};
+---
+<Base lang={lang} cle={cle} alterne={alterne} titre={tr(a.data, 'titre', lang)} description={extrait(tr(a.data, 'chapo', lang), 160)} type="article" image={image || undefined} jsonld={jsonld}>
+  <Intro
+    surtitre={libelle('categoriesActualite', a.data.categorie || 'institut', lang)}
+    titre={tr(a.data, 'titre', lang)}
+    langueTitre={seulementFr(a.data, 'titre', lang) ? 'fr' : undefined}
+    fil={[{ libelle: t.nav.accueil, lien: url(route('accueil', lang)) }, { libelle: t.nav.actualites, lien: url(route('actualites', lang)) }, { libelle: extrait(tr(a.data, 'titre', lang), 48) }]}
+  >
+    <p class="meta">{dateAffichee(a, lang, 'jour')}</p>
+  </Intro>
+  <section class="section">
+    <div class="conteneur pile" style="gap:32px;max-width:860px">
+      {tr(a.data, 'chapo', lang) && <p class="chapo" style="color:var(--encre)" lang={seulementFr(a.data, 'chapo', lang) ? 'fr' : undefined}>{tr(a.data, 'chapo', lang)}</p>}
+      {image && <img src={image} alt="" style="border-radius:var(--rayon);width:100%" />}
+      {corpsFr && <p class="note-langue">{t.enFrancais}</p>}
+      {corps && <div class="prose" lang={corpsFr ? 'fr' : undefined} set:html={corps} />}
+      {a.data.lien && <a class="lien-fleche" href={/^https?:/.test(a.data.lien) ? a.data.lien : url(a.data.lien)} target={/^https?:/.test(a.data.lien) ? '_blank' : undefined} rel="noopener">{t.enSavoirPlus}<Icone nom="fleche-droite" /></a>}
+      <a class="retour" href={url(route('actualites', lang))}><Icone nom="fleche-gauche" />{t.retourActualites}</a>
+    </div>
+  </section>
+  {autres.length > 0 && (
+    <section class="section section--teinte section--serree">
+      <div class="conteneur">
+        <div class="tete-section"><div class="tete-section__texte"><h2 style="font-size:clamp(1.4rem,1.2rem + 0.8vw,1.8rem)">{lang === 'fr' ? 'Autres actualités' : 'More news'}</h2></div></div>
+        <div class="fil">{autres.map((x) => <CarteActualite a={x} lang={lang} />)}</div>
+      </div>
+    </section>
+  )}
+</Base>

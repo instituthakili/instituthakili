@@ -1,0 +1,86 @@
+{
+  "intro_titre": "Axes de travail",
+  "intro_titre_en": "Programmes",
+  "intro_texte": "Le programme de l'institut pour la période 2026-2029 s'organise autour de quatre axes complémentaires, qui vont de l'analyse du droit applicable jusqu'à la mise en débat public des résultats.",
+  "intro_texte_en": "The Institute's 2026-2029 programme is organised around four complementary programmes, ranging from the analysis of applicable law to the public discussion of findings.",
+  "axes": [
+    {
+      "nom": "Savoir juridique",
+      "nom_en": "Legal knowledge",
+      "accroche": "Rendre le droit lisible et discutable",
+      "accroche_en": "Making the law readable and open to debate",
+      "texte": "Cet axe regroupe les travaux d'analyse et de commentaire du droit applicable, en particulier le droit des industries extractives, le droit public financier et le droit des institutions, afin que les praticiens, les administrations et les citoyens disposent d'une lecture sûre des règles en vigueur, de leurs articulations et de leurs failles.",
+      "texte_en": "This programme covers the analysis of and commentary on applicable law, in particular the law of extractive industries, public finance law and institutional law, so that practitioners, administrations and citizens have a reliable reading of the rules in force, how they fit together and where they fall short.",
+      "exemples": [
+        "Commentaires de textes structurants, à l'instar du régime du contenu local issu de la loi n° 2023-041 du 29 août 2023",
+        "Articles de doctrine publiés dans des revues à comité de lecture",
+        "Analyses des textes nouvellement adoptés et de leurs mesures d'application"
+      ],
+      "exemples_en": [
+        "Commentaries on key legal texts, such as the local content regime established by Law No. 2023-041 of 29 August 2023",
+        "Scholarly articles published in peer-reviewed journals",
+        "Analyses of newly adopted texts and their implementing measures"
+      ],
+      "rubrique": "publications"
+    },
+    {
+      "nom": "Études de gouvernance et de redevabilité",
+      "nom_en": "Governance and accountability studies",
+      "accroche": "Documenter le fonctionnement réel des institutions",
+      "accroche_en": "Documenting how institutions actually work",
+      "texte": "Les études de l'institut documentent le fonctionnement réel des institutions chargées de la gestion des ressources publiques, qu'il s'agisse des régies financières, des administrations minières ou des organes de contrôle, en confrontant systématiquement ce que prévoient les textes à ce qu'observent les acteurs dans les faits.",
+      "texte_en": "The Institute's studies document how the institutions in charge of public resources actually operate, whether revenue authorities, mining administrations or oversight bodies, by systematically comparing what the texts provide with what stakeholders observe in practice.",
+      "exemples": [
+        "Notes d'analyse fondées sur des données publiques, à l'instar de la note « L'or invisible du Mali » consacrée aux statistiques miroir de l'or artisanal",
+        "Études sur la répartition des compétences entre les structures publiques",
+        "Enquêtes auprès des acteurs institutionnels et de la société civile"
+      ],
+      "exemples_en": [
+        "Analytical notes based on public data, such as the note “Mali's invisible gold” on mirror statistics for artisanal gold",
+        "Studies on the allocation of powers between public bodies",
+        "Surveys of institutional stakeholders and civil society"
+      ],
+      "rubrique": "publications"
+    },
+    {
+      "nom": "Indices et baromètres",
+      "nom_en": "Indices and barometers",
+      "accroche": "Mesurer pour comparer dans le temps et entre pays",
+      "accroche_en": "Measuring to compare over time and across countries",
+      "texte": "L'institut construit des instruments de mesure à méthodologie explicite, qui permettent de suivre dans le temps et de comparer entre pays la résilience démocratique, la transparence budgétaire, la sincérité des engagements internationaux pris envers l'Afrique et la mise en œuvre des politiques de paix et de réconciliation.",
+      "texte_en": "The Institute builds measurement instruments with explicit methodologies, which make it possible to track over time and compare across countries democratic resilience, budget transparency, the sincerity of international commitments towards Africa and the implementation of peace and reconciliation policies.",
+      "exemples": [
+        "Indice HAKILI de résilience démocratique (IHRD)",
+        "Indice HAKILI de réactivité et de transparence budgétaire (IHRTB)",
+        "Indice de transparence et de sincérité des relations entre l'Afrique et les pays développés (ITS-Afrique)",
+        "Baromètre de mise en œuvre de la Charte nationale pour la paix et la réconciliation"
+      ],
+      "exemples_en": [
+        "HAKILI Democratic Resilience Index (IHRD)",
+        "HAKILI Budget Responsiveness and Transparency Index (IHRTB)",
+        "Index of Transparency and Sincerity in Africa's Relations with Developed Countries (ITS-Afrique)",
+        "Implementation Barometer of the National Charter for Peace and Reconciliation"
+      ],
+      "rubrique": "indices"
+    },
+    {
+      "nom": "Publication et débat",
+      "nom_en": "Publication and debate",
+      "accroche": "Mettre les résultats en discussion publique",
+      "accroche_en": "Putting findings up for public discussion",
+      "texte": "Les résultats des travaux sont diffusés en accès ouvert et portés dans le débat public au moyen de conférences, de séminaires et de séances de restitution, de sorte qu'ils soient à même d'éclairer la décision publique et de nourrir le dialogue entre institutions, chercheurs et citoyens.",
+      "texte_en": "Findings are published in open access and brought into public debate through conferences, seminars and presentations, so that they can inform public decision-making and feed the dialogue between institutions, researchers and citizens.",
+      "exemples": [
+        "Collections de publications de l'institut",
+        "Conférences et séminaires de restitution",
+        "Contributions au débat public dans les médias"
+      ],
+      "exemples_en": [
+        "The Institute's publication series",
+        "Conferences and seminars presenting findings",
+        "Contributions to public debate in the media"
+      ],
+      "rubrique": "actualites"
+    }
+  ]
+}

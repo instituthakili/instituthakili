@@ -1,0 +1,19 @@
+---
+import Base from '../layouts/Base.astro';
+import Icone from '../components/Icone.astro';
+import { url } from '../lib/content.js';
+---
+<Base lang="fr" titre="Page introuvable" alterne={url('/en/')}>
+  <section class="section">
+    <div class="conteneur pile" style="gap:22px;max-width:760px">
+      <p class="surtitre">Erreur 404</p>
+      <h1>Cette page est introuvable</h1>
+      <p class="chapo">L’adresse demandée n’existe pas ou a été déplacée. Les publications, les indices et les actualités de l’institut restent accessibles depuis la page d’accueil.</p>
+      <p class="chapo" lang="en">This page could not be found. The Institute’s publications, indices and news are available from the home page.</p>
+      <p style="display:flex;gap:12px;flex-wrap:wrap">
+        <a class="bouton bouton--plein" href={url('/')}>Retour à l’accueil<Icone nom="fleche-droite" /></a>
+        <a class="bouton bouton--contour" href={url('/en/')} lang="en">English home page</a>
+      </p>
+    </div>
+  </section>
+</Base>

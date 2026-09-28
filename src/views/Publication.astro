@@ -1,0 +1,155 @@
+---
+import Base from '../layouts/Base.astro';
+import Intro from '../components/Intro.astro';
+import LignePublication from '../components/LignePublication.astro';
+import Icone from '../components/Icone.astro';
+import { UI, route, libelle } from '../lib/i18n.js';
+import { contenus, url, tr, md, media, seulementFr, typo } from '../lib/content.js';
+import { dateAffichee, tailleFichier, citation, isoDate, extrait } from '../lib/format.js';
+
+interface Props { lang: 'fr' | 'en'; cle: string; slug: string }
+const { lang, cle, slug } = Astro.props;
+const t = UI[lang];
+const c = await contenus();
+const p = c.publications.find((x) => x.slug === slug);
+const alterne = url(route(cle, lang === 'fr' ? 'en' : 'fr', slug));
+const titre = tr(p.data, 'titre', lang);
+const sousTitre = tr(p.data, 'sous_titre', lang);
+const resume = tr(p.data, 'resume', lang);
+const resumeFr = seulementFr(p.data, 'resume', lang);
+const corps = lang === 'en' && p.data.corps_en ? md(p.data.corps_en) : p.html;
+const corpsFr = lang === 'en' && !p.data.corps_en && p.html;
+const fichier = media(p.data.fichier);
+const taille = tailleFichier(p.data.fichier, lang);
+const lien = p.data.lien;
+const couverture = media(p.data.couverture);
+const dateAff = dateAffichee(p, lang);
+const sousTitreCitation = p.data.sous_titre ? String(p.data.sous_titre).charAt(0).toLowerCase() + String(p.data.sous_titre).slice(1) : '';
+const titreCitation = sousTitreCitation ? `${p.data.titre}\u00A0: ${sousTitreCitation}` : String(p.data.titre || '');
+const refCitation = typo(citation(p, lang, titreCitation));
+const liees = c.publications
+  .filter((x) => x.slug !== slug && x.themes.some((th) => p.themes.includes(th)))
+  .slice(0, 3);
+const contactLien = url(route('contact', lang)) + '?objet=' + encodeURIComponent(lang === 'fr' ? `Demande du document «\u00A0${p.data.titre}\u00A0»` : `Request for the document “${p.data.titre}”`);
+const jsonld = {
+  '@context': 'https://schema.org',
+  '@type': p.type === 'article' ? 'ScholarlyArticle' : p.type === 'ouvrage' ? 'Book' : 'Report',
+  name: p.data.titre,
+  headline: p.data.titre,
+  author: p.auteurs.map((a: string) => ({ '@type': 'Person', name: a })),
+  datePublished: p.date ? isoDate(p.date) : undefined,
+  inLanguage: p.data.langue || 'fr',
+  abstract: p.data.resume || undefined,
+  isPartOf: p.data.source || undefined,
+  url: lien || undefined,
+  publisher: { '@type': 'Organization', name: 'Institut HAKILI' },
+};
+---
+<Base lang={lang} cle={cle} alterne={alterne} titre={titre} description={extrait(resume, 160)} type="article" jsonld={jsonld}>
+  <Intro
+    surtitre={libelle('typesPublication', p.type, lang)}
+    titre={titre}
+    langueTitre={seulementFr(p.data, 'titre', lang) ? 'fr' : undefined}
+    fil={[{ libelle: t.nav.accueil, lien: url(route('accueil', lang)) }, { libelle: t.nav.publications, lien: url(route('publications', lang)) }, { libelle: extrait(titre, 48) }]}
+  >
+    {sousTitre && <p class="chapo" lang={seulementFr(p.data, 'sous_titre', lang) ? 'fr' : undefined}>{sousTitre}</p>}
+    <p class="meta">{[p.auteurs.join(', '), dateAff, p.data.source].filter(Boolean).join(' · ')}</p>
+  </Intro>
+
+  <section class="section">
+    <div class="conteneur colonnes">
+      <article class="pile" style="gap:40px">
+        {resume && (
+          <div class="pile" style="gap:14px">
+            <h2 style="font-size:clamp(1.4rem,1.2rem + 0.8vw,1.8rem)">{t.resume}</h2>
+            {resumeFr && <p class="note-langue">{t.enFrancais}</p>}
+            <div class="prose" lang={resumeFr ? 'fr' : undefined} style="font-size:1.2rem" set:html={md(resume)} />
+          </div>
+        )}
+        {corps && (
+          <div class="pile" style="gap:14px">
+            <h2 style="font-size:clamp(1.4rem,1.2rem + 0.8vw,1.8rem)">{t.presentation}</h2>
+            {corpsFr && <p class="note-langue">{t.enFrancais}</p>}
+            <div class="prose" lang={corpsFr ? 'fr' : undefined} set:html={corps} />
+          </div>
+        )}
+        <div class="citation">
+          <h2 class="surtitre" style="font-family:var(--f-ui);font-size:var(--t-xs)">{t.citer}</h2>
+          <p data-citation>{refCitation}</p>
+          <button type="button" data-copier data-texte-ok={t.copie}><span>{t.copier}</span></button>
+        </div>
+      </article>
+      <aside class="colonne-collante">
+        {couverture && <img src={couverture} alt="" style="border-radius:var(--rayon);border:1px solid var(--filet);max-width:260px" loading="lazy" />}
+        <div class="encadre">
+          {fichier && (
+            <a class="bouton bouton--plein bouton--large" href={fichier} download target="_blank" rel="noopener">
+              <Icone nom="telecharger" />{t.telechargerPdf}{taille && <span style="font-weight:500;opacity:.85">({taille})</span>}
+            </a>
+          )}
+          {lien && (
+            <a class={`bouton ${fichier ? 'bouton--contour' : 'bouton--plein'} bouton--large`} href={lien} target="_blank" rel="noopener">
+              <Icone nom="externe" />{t.consulterEnLigne}
+            </a>
+          )}
+          {!fichier && !lien && (
+            <a class="bouton bouton--contour bouton--large" href={contactLien}><Icone nom="courriel" />{t.demanderDocument}</a>
+          )}
+          <dl class="fiche">
+            <dt>{t.type}</dt><dd>{libelle('typesPublication', p.type, lang)}</dd>
+            {dateAff && (<><dt>{t.date}</dt><dd>{dateAff}</dd></>)}
+            {p.auteurs.length > 0 && (<><dt>{t.auteurs}</dt><dd>{p.auteurs.join(', ')}</dd></>)}
+            {p.data.source && (<><dt>{t.source}</dt><dd>{p.data.source}</dd></>)}
+            {p.data.identifiant && (<><dt>{t.identifiant}</dt><dd>{p.data.identifiant}</dd></>)}
+            {p.data.pages && (<><dt>{t.pages}</dt><dd>{p.data.pages}</dd></>)}
+            {p.data.langue && (<><dt>{t.langueDoc}</dt><dd>{libelle('langues', p.data.langue, lang)}</dd></>)}
+          </dl>
+          {p.themes.length > 0 && (
+            <div class="pile" style="gap:10px">
+              <h3 class="surtitre" style="font-family:var(--f-ui);font-size:var(--t-xs)">{t.themes}</h3>
+              <ul class="etiquettes">
+                {p.themes.map((th: string) => <li><span class="pastille">{libelle('themes', th, lang)}</span></li>)}
+              </ul>
+            </div>
+          )}
+        </div>
+        <a class="retour" href={url(route('publications', lang))}><Icone nom="fleche-gauche" />{t.retourPublications}</a>
+      </aside>
+    </div>
+  </section>
+
+  {liees.length > 0 && (
+    <section class="section section--teinte section--serree">
+      <div class="conteneur">
+        <div class="tete-section"><div class="tete-section__texte"><h2 style="font-size:clamp(1.4rem,1.2rem + 0.8vw,1.8rem)">{t.publicationsLiees}</h2></div></div>
+        <ul class="registre">
+          {liees.map((x) => <LignePublication p={x} lang={lang} />)}
+        </ul>
+      </div>
+    </section>
+  )}
+</Base>
+
+<script>
+  document.querySelectorAll('[data-copier]').forEach((b) => {
+    b.addEventListener('click', async () => {
+      const texte = document.querySelector('[data-citation]')?.textContent || '';
+      const etiquette = b.querySelector('span');
+      const initial = etiquette?.textContent;
+      try {
+        await navigator.clipboard.writeText(texte);
+        if (etiquette) etiquette.textContent = b.getAttribute('data-texte-ok') || '';
+        setTimeout(() => { if (etiquette && initial) etiquette.textContent = initial; }, 2000);
+      } catch (e) {
+        const el = document.querySelector('[data-citation]');
+        if (el) {
+          const r = document.createRange();
+          r.selectNodeContents(el);
+          const s = window.getSelection();
+          s?.removeAllRanges();
+          s?.addRange(r);
+        }
+      }
+    });
+  });
+</script>

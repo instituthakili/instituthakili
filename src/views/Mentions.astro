@@ -1,0 +1,52 @@
+---
+import Base from '../layouts/Base.astro';
+import Intro from '../components/Intro.astro';
+import { UI, route } from '../lib/i18n.js';
+import { contenus, url, tr } from '../lib/content.js';
+
+interface Props { lang: 'fr' | 'en'; cle: string; slug?: string }
+const { lang, cle } = Astro.props;
+const t = UI[lang];
+const c = await contenus();
+const r = c.reglages;
+const directeur = c.equipe.find((m) => m.data.groupe === 'direction');
+const alterne = url(route(cle, lang === 'fr' ? 'en' : 'fr'));
+---
+<Base lang={lang} cle={cle} alterne={alterne} titre={t.nav.mentions}>
+  <Intro titre={t.nav.mentions} fil={[{ libelle: t.nav.accueil, lien: url(route('accueil', lang)) }, { libelle: t.nav.mentions }]} />
+  <section class="section">
+    <div class="conteneur">
+      {lang === 'fr' ? (
+        <div class="prose">
+          <h2>Éditeur du site</h2>
+          <p>{r.nom_complet}{r.sigle ? ` (${r.sigle})` : ''}, association de droit malien dont le siège est établi à Bamako (République du Mali).{r.courriel ? ` Courriel ${r.courriel}.` : ''}{(r.telephones || []).length ? ` Téléphone ${(r.telephones || []).join(' ou ')}.` : ''}</p>
+          <h2>Directeur de la publication</h2>
+          <p>{directeur ? `${directeur.data.nom}, ${String(directeur.data.fonction || '').toLowerCase()}.` : 'Le Directeur exécutif de l’institut.'}</p>
+          <h2>Hébergement</h2>
+          <p>Le site est hébergé par GitHub Pages, service de la société GitHub, Inc., 88 Colin P. Kelly Jr. Street, San Francisco, CA 94107, États-Unis.</p>
+          <h2>Propriété intellectuelle</h2>
+          <p>Les textes, publications, logos et éléments graphiques du site sont la propriété de l’Institut HAKILI ou de leurs auteurs. Sauf mention contraire, les publications mises en ligne peuvent être citées à des fins non commerciales, sous réserve de la mention de leurs auteurs et de leur source.</p>
+          <h2>Données personnelles</h2>
+          <p>Les informations transmises au moyen du formulaire de contact sont utilisées aux seules fins de répondre aux demandes. Elles sont acheminées par le service d’envoi de formulaires Web3Forms et ne sont ni cédées ni utilisées à d’autres fins. Toute personne peut demander la consultation, la rectification ou la suppression des informations la concernant en écrivant à l’institut.</p>
+          <h2>Cookies et contenus tiers</h2>
+          <p>Le site ne dépose aucun cookie de mesure d’audience. Les vidéos hébergées sur YouTube ne sont chargées qu’à la demande du visiteur, au moyen du mode de confidentialité renforcée.</p>
+        </div>
+      ) : (
+        <div class="prose">
+          <h2>Publisher</h2>
+          <p>{r.nom_complet_en || r.nom_complet}{r.sigle ? ` (${r.sigle})` : ''}, an association under Malian law headquartered in Bamako (Republic of Mali).{r.courriel ? ` Email ${r.courriel}.` : ''}{(r.telephones || []).length ? ` Telephone ${(r.telephones || []).join(' or ')}.` : ''}</p>
+          <h2>Publication director</h2>
+          <p>{directeur ? `${directeur.data.nom}, ${tr(directeur.data, 'fonction', 'en')}.` : 'The Executive Director of the Institute.'}</p>
+          <h2>Hosting</h2>
+          <p>The site is hosted by GitHub Pages, a service of GitHub, Inc., 88 Colin P. Kelly Jr. Street, San Francisco, CA 94107, United States.</p>
+          <h2>Intellectual property</h2>
+          <p>The texts, publications, logos and graphic elements of this site belong to the HAKILI Institute or to their authors. Unless stated otherwise, the publications may be quoted for non-commercial purposes, provided their authors and source are acknowledged.</p>
+          <h2>Personal data</h2>
+          <p>Information sent through the contact form is used solely to answer requests. It is transmitted through the Web3Forms form service and is neither shared nor used for any other purpose. Anyone may ask to access, correct or delete information concerning them by writing to the Institute.</p>
+          <h2>Cookies and third-party content</h2>
+          <p>The site sets no audience-measurement cookies. Videos hosted on YouTube load only when the visitor asks for them, in privacy-enhanced mode.</p>
+        </div>
+      )}
+    </div>
+  </section>
+</Base>

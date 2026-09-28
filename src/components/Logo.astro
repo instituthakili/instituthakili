@@ -1,0 +1,28 @@
+---
+/* Logo de l'Institut HAKILI, piste « Le Cercle de palabre ».
+   Le logotype est vectorisé (TeX Gyre Adventor), il ne dépend d'aucune police installée.
+   Les couleurs suivent les variables CSS du conteneur (--logo-anneau, --logo-accent, --logo-texte, --logo-texte-2). */
+interface Props { titre?: string; class?: string; symboleSeul?: boolean }
+const { titre = 'Institut HAKILI', class: cls = '', symboleSeul = false } = Astro.props;
+---
+{symboleSeul ? (
+  <svg class={`logo logo--symbole ${cls}`} viewBox="0 0 200 200" role="img" aria-label={titre} focusable="false">
+    <g class="logo__anneaux">
+      <circle class="logo__a1" cx="100" cy="100" r="82" fill="none" stroke-width="13" stroke-linecap="round" stroke-dasharray="403.59 111.63" transform="rotate(51 100 100)" />
+      <circle class="logo__a2" cx="100" cy="100" r="56" fill="none" stroke-width="13" stroke-linecap="round" stroke-dasharray="281.49 70.37" transform="rotate(171 100 100)" />
+      <circle class="logo__a3" cx="100" cy="100" r="30" fill="none" stroke-width="13" stroke-linecap="round" stroke-dasharray="153.94 34.56" transform="rotate(291 100 100)" />
+      <circle class="logo__point" cx="100" cy="100" r="9" />
+    </g>
+  </svg>
+) : (
+  <svg class={`logo ${cls}`} viewBox="0 0 328 112" role="img" aria-label={titre} focusable="false">
+    <g transform="translate(0 10) scale(0.46)">
+      <circle class="logo__a1" cx="100" cy="100" r="82" fill="none" stroke-width="13" stroke-linecap="round" stroke-dasharray="403.59 111.63" transform="rotate(51 100 100)" />
+      <circle class="logo__a2" cx="100" cy="100" r="56" fill="none" stroke-width="13" stroke-linecap="round" stroke-dasharray="281.49 70.37" transform="rotate(171 100 100)" />
+      <circle class="logo__a3" cx="100" cy="100" r="30" fill="none" stroke-width="13" stroke-linecap="round" stroke-dasharray="153.94 34.56" transform="rotate(291 100 100)" />
+      <circle class="logo__point" cx="100" cy="100" r="9" />
+    </g>
+    <path class="logo__institut" transform="translate(116 36)" d="M1.9000000000000001 0.0H3.75V-18.475H1.9000000000000001ZM16.55 0.0H18.4V-16.25L29.4 0.0H31.25V-18.475H29.4V-3.1500000000000004L19.05 -18.475H16.55ZM42.699999999999996 -5.175000000000001C42.875 -1.85 45.15 0.325 48.475 0.325C51.675 0.325 54.05 -2.0 54.05 -5.15C54.05 -6.775 53.375 -8.225 52.2 -9.1C51.45 -9.65 50.675 -10.0 48.775 -10.575000000000001C47.1 -11.075000000000001 46.525 -11.3 46.05 -11.725000000000001C45.525 -12.175 45.175 -13.025 45.175 -13.875C45.175 -15.725000000000001 46.525 -17.1 48.375 -17.1C50.25 -17.1 51.675 -15.8 51.675 -13.8H53.6C53.6 -16.8 51.45 -18.8 48.425 -18.8C45.449999999999996 -18.8 43.3 -16.7 43.3 -13.825000000000001C43.3 -12.55 43.775 -11.325000000000001 44.6 -10.55C45.324999999999996 -9.850000000000001 45.9 -9.575000000000001 48.05 -8.925C51.225 -7.95 52.175 -7.075 52.175 -5.050000000000001C52.175 -2.9250000000000003 50.625 -1.375 48.525 -1.375C46.449999999999996 -1.375 44.949999999999996 -2.7 44.675 -5.175000000000001ZM63.775 -16.8H68.0V0.0H69.85V-16.8H74.075V-18.475H63.775ZM85.15 0.0H87.0V-18.475H85.15ZM98.075 -16.8H102.30000000000001V0.0H104.15V-16.8H108.375V-18.475H98.075ZM119.45000000000002 -6.95C119.45000000000002 -1.925 122.00000000000001 0.325 125.72500000000001 0.325C129.47500000000002 0.325 132.025 -1.925 132.025 -6.95V-18.475H130.175V-6.95C130.175 -3.1750000000000003 128.60000000000002 -1.375 125.75000000000001 -1.375C122.85000000000001 -1.375 121.30000000000001 -3.1750000000000003 121.30000000000001 -6.95V-18.475H119.45000000000002ZM143.10000000000002 -16.8H147.32500000000002V0.0H149.175V-16.8H153.4V-18.475H143.10000000000002Z" />
+    <path class="logo__hakili" transform="translate(116 97)" d="M4.488 0.0H13.530000000000001V-20.46H30.954V0.0H39.996V-48.774H30.954V-29.106H13.530000000000001V-48.774H4.488ZM47.322 0.0H57.288L62.7 -12.606H80.05799999999999L85.27199999999999 0.0H95.238L74.778 -48.774H67.65ZM66.0 -21.252000000000002 71.214 -36.036 76.428 -21.252000000000002ZM102.168 0.0H111.21000000000001V-21.45L126.32400000000001 0.0H137.214L118.86600000000001 -24.816000000000003L137.214 -48.774H126.32400000000001L111.21000000000001 -27.720000000000002V-48.774H102.168ZM145.068 0.0H154.11V-48.774H145.068ZM165.528 0.0H189.486V-8.646H174.57V-48.774H165.528ZM196.54799999999997 0.0H205.58999999999997V-48.774H196.54799999999997Z" />
+  </svg>
+)}

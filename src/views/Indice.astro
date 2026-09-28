@@ -1,0 +1,77 @@
+---
+import Base from '../layouts/Base.astro';
+import Intro from '../components/Intro.astro';
+import Echelle from '../components/Echelle.astro';
+import Icone from '../components/Icone.astro';
+import { UI, route, libelle } from '../lib/i18n.js';
+import { contenus, url, tr, md, seulementFr, typo } from '../lib/content.js';
+
+interface Props { lang: 'fr' | 'en'; cle: string; slug: string }
+const { lang, cle, slug } = Astro.props;
+const t = UI[lang];
+const c = await contenus();
+const i = c.indices.find((x) => x.slug === slug);
+const alterne = url(route(cle, lang === 'fr' ? 'en' : 'fr', slug));
+const corps = lang === 'en' && i.data.corps_en ? md(i.data.corps_en) : i.html;
+const corpsFr = lang === 'en' && !i.data.corps_en;
+const chiffres = (i.data.chiffres || []).filter((x: any) => x && x.valeur);
+const autres = c.indices.filter((x) => x.slug !== slug);
+---
+<Base lang={lang} cle={cle} alterne={alterne} titre={`${tr(i.data, 'sigle', lang)}, ${tr(i.data, 'nom', lang)}`} description={tr(i.data, 'accroche', lang)}>
+  <Intro
+    surtitre={tr(i.data, 'sigle', lang)}
+    titre={tr(i.data, 'nom', lang)}
+    texte={tr(i.data, 'accroche', lang)}
+    fil={[{ libelle: t.nav.accueil, lien: url(route('accueil', lang)) }, { libelle: t.nav.indices, lien: url(route('indices', lang)) }, { libelle: tr(i.data, 'sigle', lang) }]}
+  >
+    {i.data.statut && (
+      <p><span class={`pastille ${i.data.statut === 'conception' ? 'pastille--terre' : ''}`}><span class="pastille__point"></span>{libelle('statutsIndice', i.data.statut, lang)}</span></p>
+    )}
+  </Intro>
+  <section class="section">
+    <div class="conteneur colonnes">
+      <div class="pile" style="gap:40px">
+        {(i.data.composantes || []).length > 0 && (
+          <div class="pile" style="gap:16px">
+            <h2 style="font-size:clamp(1.4rem,1.2rem + 0.8vw,1.8rem)">{t.architecture}</h2>
+            <Echelle composantes={i.data.composantes} lang={lang} />
+          </div>
+        )}
+        {corps && (
+          <div class="pile" style="gap:12px">
+            {corpsFr && <p class="note-langue">{t.enFrancais}</p>}
+            <div class="prose" lang={corpsFr ? 'fr' : undefined} set:html={corps} />
+          </div>
+        )}
+      </div>
+      <aside class="colonne-collante">
+        <div class="encadre">
+          <h2>{t.metadonnees}</h2>
+          <dl class="fiche">
+            {i.data.statut && (<><dt>{t.statut}</dt><dd>{libelle('statutsIndice', i.data.statut, lang)}</dd></>)}
+            {tr(i.data, 'perimetre', lang) && (<><dt>{t.perimetre}</dt><dd lang={seulementFr(i.data, 'perimetre', lang) ? 'fr' : undefined}>{tr(i.data, 'perimetre', lang)}</dd></>)}
+          </dl>
+          {chiffres.length > 0 && (
+            <ul class="indice__chiffres" style="border-top:1px solid var(--filet)">
+              {chiffres.map((x: any) => <li><strong>{x.valeur}</strong><span>{typo((lang === 'en' && x.libelle_en) || x.libelle)}</span></li>)}
+            </ul>
+          )}
+          <a class="bouton bouton--plein" href={url(route('contact', lang))}>{t.devenirPartenaire}<Icone nom="fleche-droite" /></a>
+        </div>
+      </aside>
+    </div>
+  </section>
+  {autres.length > 0 && (
+    <section class="section section--teinte section--serree">
+      <div class="conteneur">
+        <div class="tete-section">
+          <div class="tete-section__texte"><h2 style="font-size:clamp(1.4rem,1.2rem + 0.8vw,1.8rem)">{lang === 'fr' ? 'Les autres instruments' : 'Other instruments'}</h2></div>
+          <a class="lien-fleche" href={url(route('indices', lang))}>{t.tousIndices}<Icone nom="fleche-droite" /></a>
+        </div>
+        <ul class="etiquettes">
+          {autres.map((x) => <li><a class="pastille pastille--contour" style="font-size:.9rem;padding:8px 14px;text-decoration:none" href={url(route('indice', lang, x.slug))}>{tr(x.data, 'sigle', lang)} · {tr(x.data, 'nom', lang)}</a></li>)}
+        </ul>
+      </div>
+    </section>
+  )}
+</Base>

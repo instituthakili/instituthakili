@@ -1,0 +1,171 @@
+---
+import Base from '../layouts/Base.astro';
+import Intro from '../components/Intro.astro';
+import Icone from '../components/Icone.astro';
+import { UI, route } from '../lib/i18n.js';
+import { contenus, url, tr } from '../lib/content.js';
+
+interface Props { lang: 'fr' | 'en'; cle: string; slug?: string }
+const { lang, cle } = Astro.props;
+const t = UI[lang];
+const f = t.formulaire;
+const c = await contenus();
+const r = c.reglages;
+const page = c.pages.contact;
+const alterne = url(route(cle, lang === 'fr' ? 'en' : 'fr'));
+const cle_formulaire = String(r.cle_formulaire || '').trim();
+const tels = (r.telephones || []).filter(Boolean);
+---
+<Base lang={lang} cle={cle} alterne={alterne} titre={t.nav.contact} description={tr(page, 'intro_texte', lang)}>
+  <Intro
+    surtitre={t.nav.contact}
+    titre={tr(page, 'intro_titre', lang)}
+    texte={tr(page, 'intro_texte', lang)}
+    fil={[{ libelle: t.nav.accueil, lien: url(route('accueil', lang)) }, { libelle: t.nav.contact }]}
+  />
+  <section class="section">
+    <div class="conteneur colonnes">
+      <form class="formulaire" data-formulaire data-cle={cle_formulaire} data-sujet={lang === 'fr' ? 'Message reçu depuis le site de l’Institut HAKILI' : 'Message from the HAKILI Institute website'} novalidate>
+        <div class="champ">
+          <label for="contact-nom">{f.nom}</label>
+          <input id="contact-nom" name="name" type="text" autocomplete="name" required />
+        </div>
+        <div class="champ">
+          <label for="contact-courriel">{f.courriel}</label>
+          <input id="contact-courriel" name="email" type="email" autocomplete="email" required />
+        </div>
+        <div class="champ">
+          <label for="contact-organisation">{f.organisation}</label>
+          <input id="contact-organisation" name="organisation" type="text" autocomplete="organization" />
+        </div>
+        <div class="champ">
+          <label for="contact-objet">{f.objet}</label>
+          <select id="contact-objet" name="objet">
+            {f.objets.map((o) => <option>{o}</option>)}
+          </select>
+        </div>
+        <div class="champ plein">
+          <label for="contact-message">{f.message}</label>
+          <textarea id="contact-message" name="message" required></textarea>
+        </div>
+        <div class="formulaire__piege" aria-hidden="true">
+          <label for="contact-verif">Ne pas remplir</label>
+          <input id="contact-verif" type="checkbox" name="botcheck" tabindex="-1" />
+        </div>
+        <label class="formulaire__accord plein" for="contact-accord">
+          <input id="contact-accord" type="checkbox" name="accord" required />
+          <span>{f.consentement}</span>
+        </label>
+        <div class="plein" style="display:flex;flex-wrap:wrap;gap:16px;align-items:center">
+          <button class="bouton bouton--plein" type="submit" data-envoyer data-texte-envoi={f.envoi}><span>{f.envoyer}</span><Icone nom="fleche-droite" /></button>
+          {!cle_formulaire && <p class="meta" style="max-width:46ch">{f.sansCle}</p>}
+        </div>
+        <p class="formulaire__message formulaire__message--ok plein" role="status" hidden data-ok>{f.succes}</p>
+        <p class="formulaire__message formulaire__message--erreur plein" role="alert" hidden data-erreur>{cle_formulaire ? f.erreur : f.sansCle}</p>
+      </form>
+      <aside class="colonne-collante">
+        <div class="encadre">
+          <h2>{t.coordonnees}</h2>
+          <dl class="pile" style="gap:18px;margin:0">
+            <div class="coordonnee"><dt>{t.adresse}</dt><dd>{tr(r, 'adresse', lang)}</dd></div>
+            {tels.length > 0 && (
+              <div class="coordonnee"><dt>{t.telephone}</dt>{tels.map((tel) => <dd><a href={`tel:${tel.replace(/[^+\d]/g, '')}`}>{tel}</a></dd>)}</div>
+            )}
+            {r.courriel && (
+              <div class="coordonnee"><dt>{t.courriel}</dt><dd data-adresse>{r.courriel}</dd></div>
+            )}
+          </dl>
+          {r.courriel && (
+            <div class="citation" style="background:var(--papier-2);padding:0;background:none">
+              <button type="button" data-copier-adresse data-texte-ok={t.copie}><span>{t.copierAdresse}</span></button>
+            </div>
+          )}
+        </div>
+      </aside>
+    </div>
+  </section>
+</Base>
+
+<script>
+  const form = document.querySelector('[data-formulaire]');
+  if (form) {
+    const ok = form.querySelector('[data-ok]');
+    const erreur = form.querySelector('[data-erreur]');
+    const bouton = form.querySelector('[data-envoyer]');
+    const libelleBouton = bouton?.querySelector('span');
+    const message = form.querySelector('#contact-message');
+    try {
+      const objet = new URLSearchParams(window.location.search).get('objet');
+      if (objet && message && !message.value) message.value = objet + '\n\n';
+    } catch (e) {}
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      if (ok) ok.hidden = true;
+      if (erreur) erreur.hidden = true;
+      if (!form.checkValidity()) {
+        form.reportValidity();
+        return;
+      }
+      const cle = form.getAttribute('data-cle');
+      if (!cle) {
+        if (erreur) erreur.hidden = false;
+        return;
+      }
+      const donnees = Object.fromEntries(new FormData(form).entries());
+      if (donnees.botcheck) return;
+      const initial = libelleBouton?.textContent;
+      if (bouton) bouton.setAttribute('disabled', '');
+      if (libelleBouton) libelleBouton.textContent = bouton?.getAttribute('data-texte-envoi') || '';
+      try {
+        const reponse = await fetch('https://api.web3forms.com/submit', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+          body: JSON.stringify({
+            access_key: cle,
+            subject: `${form.getAttribute('data-sujet')} (${donnees.objet || ''})`,
+            from_name: 'Site Institut HAKILI',
+            replyto: donnees.email,
+            name: donnees.name,
+            email: donnees.email,
+            organisation: donnees.organisation || '',
+            objet: donnees.objet || '',
+            message: donnees.message,
+          }),
+        });
+        const resultat = await reponse.json().catch(() => ({}));
+        if (reponse.ok && resultat.success !== false) {
+          form.reset();
+          if (ok) ok.hidden = false;
+        } else if (erreur) {
+          erreur.hidden = false;
+        }
+      } catch (err) {
+        if (erreur) erreur.hidden = false;
+      } finally {
+        if (bouton) bouton.removeAttribute('disabled');
+        if (libelleBouton && initial) libelleBouton.textContent = initial;
+      }
+    });
+  }
+  document.querySelectorAll('[data-copier-adresse]').forEach((b) => {
+    b.addEventListener('click', async () => {
+      const texte = document.querySelector('[data-adresse]')?.textContent || '';
+      const s = b.querySelector('span');
+      const initial = s?.textContent;
+      try {
+        await navigator.clipboard.writeText(texte.trim());
+        if (s) s.textContent = b.getAttribute('data-texte-ok') || '';
+        setTimeout(() => { if (s && initial) s.textContent = initial; }, 2000);
+      } catch (e) {
+        const el = document.querySelector('[data-adresse]');
+        if (el) {
+          const r = document.createRange();
+          r.selectNodeContents(el);
+          const sel = window.getSelection();
+          sel?.removeAllRanges();
+          sel?.addRange(r);
+        }
+      }
+    });
+  });
+</script>

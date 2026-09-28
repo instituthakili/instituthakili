@@ -1,0 +1,26 @@
+---
+// Barre de notation : répartition des points entre les composantes d'un indice.
+import { UI } from '../lib/i18n.js';
+import { typo } from '../lib/content.js';
+interface Props { composantes: any[]; lang: 'fr' | 'en' }
+const { composantes = [], lang } = Astro.props;
+const t = UI[lang];
+const parts = composantes
+  .map((c) => ({ nom: typo((lang === 'en' && c.nom_en) || c.nom), points: Number(c.points) || 0 }))
+  .filter((c) => c.nom && c.points > 0)
+  .slice(0, 4);
+const total = parts.reduce((s, c) => s + c.points, 0);
+---
+{parts.length > 0 && (
+  <div class="echelle">
+    <div class="echelle__barre" role="img" aria-label={parts.map((c) => `${c.nom} ${c.points} ${t.points}`).join(', ')}>
+      {parts.map((c) => <span class="echelle__part" style={`flex:${c.points}`}></span>)}
+    </div>
+    <ul class="echelle__legende">
+      {parts.map((c) => (
+        <li><i></i>{c.nom} <b>{c.points}</b></li>
+      ))}
+      {total > 0 && <li style="margin-left:auto"><span class="meta">{`Total ${total} ${t.points}`}</span></li>}
+    </ul>
+  </div>
+)}
