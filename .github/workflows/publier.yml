@@ -1,0 +1,56 @@
+name: Publier le site
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  construire:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Ouvrir l'archive du site si elle est présente
+        run: |
+          ARCHIVE=$(ls site-institut-hakili*.zip 2>/dev/null | head -n 1)
+          if [ -n "$ARCHIVE" ]; then
+            unzip -o "$ARCHIVE" -x '.github/*'
+            rm -f "$ARCHIVE"
+            git config user.name "Institut HAKILI"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add -A
+            git commit -m "Installation des fichiers du site"
+            git push
+          fi
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - id: pages
+        uses: actions/configure-pages@v5
+      - run: npm ci
+      - run: npm run build
+        env:
+          SITE_URL: ${{ steps.pages.outputs.origin }}
+          BASE_PATH: ${{ steps.pages.outputs.base_path }}
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+  publier:
+    needs: construire
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploiement.outputs.page_url }}
+    steps:
+      - id: deploiement
+        uses: actions/deploy-pages@v5
