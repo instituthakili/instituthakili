@@ -36,6 +36,17 @@ export function media(valeur) {
   if (/^https?:\/\//i.test(v)) return v;
   let chemin = v.replace(/^\.?\/*/, '');
   chemin = chemin.replace(/^public\//, '');
+  // Les noms de fichiers déposés peuvent contenir des espaces ou des accents.
+  chemin = chemin
+    .split('/')
+    .map((s) => {
+      try {
+        return encodeURIComponent(decodeURIComponent(s));
+      } catch (e) {
+        return encodeURIComponent(s);
+      }
+    })
+    .join('/');
   return url('/' + chemin);
 }
 
