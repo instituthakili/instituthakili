@@ -1,9 +1,9 @@
 ---
 nom: Dr Ilo Allaye Diall
-fonction: Enseignant-chercheur et consultant
-fonction_en: Lecturer-researcher and consultant
-groupe: conseil
-ordre: 9
+fonction: Secrétaire général
+fonction_en: Secretary General
+groupe: direction
+ordre: 2
 photo: ''
 bio: ''
 bio_en: ''
