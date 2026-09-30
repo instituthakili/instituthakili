@@ -55,7 +55,12 @@ export function isoDate(date) {
 export function tailleFichier(valeur, lang = 'fr') {
   if (!valeur || /^https?:/i.test(valeur)) return '';
   try {
-    const rel = String(valeur).replace(/^\.?\/*/, '').replace(/^public\//, '');
+    let rel = String(valeur).replace(/^\.?\/*/, '').replace(/^public\//, '');
+    try {
+      rel = decodeURIComponent(rel);
+    } catch (e) {
+      // Nom de fichier déjà lisible tel quel.
+    }
     const complet = path.join(process.cwd(), 'public', rel);
     const o = fs.statSync(complet).size;
     if (o < 1024 * 1024) {
