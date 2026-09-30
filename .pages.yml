@@ -494,7 +494,7 @@ content:
         default: conseil
         options:
           values:
-            - { name: direction, label: "Direction" }
+            - { name: direction, label: "Bureau exécutif" }
             - { name: conseil, label: "Conseil d'administration" }
             - { name: equipe, label: "Équipe" }
             - { name: associes, label: "Chercheurs associés" }
