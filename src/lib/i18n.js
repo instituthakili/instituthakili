@@ -330,7 +330,7 @@ export const LIBELLES = {
     publie: { fr: 'Résultats publiés', en: 'Results published' },
   },
   groupesEquipe: {
-    direction: { fr: 'Direction', en: 'Management' },
+    direction: { fr: 'Bureau exécutif', en: 'Executive Bureau' },
     conseil: { fr: "Conseil d’administration", en: 'Board of Directors' },
     equipe: { fr: 'Équipe', en: 'Staff' },
     associes: { fr: 'Chercheurs associés', en: 'Associate researchers' },
