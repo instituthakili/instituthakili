@@ -84,15 +84,21 @@ const etapes = page.etapes || [];
         <h2>{tr(page, 'gouvernance_titre', lang)}</h2>
         <div class="prose" set:html={md(tr(page, 'gouvernance', lang))} />
       </div>
-      {direction.map((m) => (
+      {direction[0] && (
         <div class="encadre" style="gap:14px">
           <h2>{libelle('groupesEquipe', 'direction', lang)}</h2>
-          {media(m.data.photo) && <img class="direction__portrait" src={media(m.data.photo)} alt={m.data.nom} />}
-          <h3 style="font-size:1.6rem">{m.data.nom}</h3>
-          <p class="direction__fonction">{tr(m.data, 'fonction', lang)}</p>
-          <div class="prose" style="font-size:1.05rem;color:var(--encre-2)" set:html={md(tr(m.data, 'bio', lang))} />
+          {media(direction[0].data.photo) && <img class="direction__portrait" src={media(direction[0].data.photo)} alt={direction[0].data.nom} />}
+          <h3 style="font-size:1.6rem">{direction[0].data.nom}</h3>
+          <p class="direction__fonction">{tr(direction[0].data, 'fonction', lang)}</p>
+          <div class="prose" style="font-size:1.05rem;color:var(--encre-2)" set:html={md(tr(direction[0].data, 'bio', lang))} />
+          {direction.slice(1).map((m) => (
+            <div style="border-top:1px solid var(--filet);padding-top:16px;display:grid;gap:4px">
+              <h3 style="font-size:1.3rem">{m.data.nom}</h3>
+              <p class="direction__fonction">{tr(m.data, 'fonction', lang)}</p>
+            </div>
+          ))}
         </div>
-      ))}
+      )}
     </div>
   </section>
 
