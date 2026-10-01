@@ -2,6 +2,8 @@
 
 Site bilingue (français et anglais) de l'Institut HAKILI pour la Gouvernance et la Redevabilité en Afrique (IHGR).
 
+Le site est en ligne à l'adresse [institut-hakili.org](https://institut-hakili.org).
+
 ## Modifier les contenus
 
 Les contenus se modifient depuis l'espace d'administration, à l'adresse https://app.pagescms.org, sans toucher au code. Chaque enregistrement met le site à jour en deux à trois minutes.
