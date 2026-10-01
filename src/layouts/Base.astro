@@ -46,7 +46,17 @@ const organisation = {
   telephone: (reglages.telephones || [])[0] || undefined,
   address: { '@type': 'PostalAddress', addressLocality: 'Bamako', addressCountry: 'ML' },
 };
-const donneesStructurees = [organisation, ...(Array.isArray(jsonld) ? jsonld : jsonld ? [jsonld] : [])];
+// Nom du site que Google affiche dans ses résultats, déclaré sur les pages d'accueil.
+const sansBarre = (s: string) => s.replace(/\/+$/, '');
+const estAccueil = [url('/'), url('/en/')].map(sansBarre).includes(sansBarre(Astro.url.pathname));
+const siteWeb = {
+  '@context': 'https://schema.org',
+  '@type': 'WebSite',
+  name: reglages.nom || 'Institut HAKILI',
+  alternateName: [reglages.sigle || 'IHGR', reglages.nom_complet].filter(Boolean),
+  url: site + url('/'),
+};
+const donneesStructurees = [organisation, ...(estAccueil ? [siteWeb] : []), ...(Array.isArray(jsonld) ? jsonld : jsonld ? [jsonld] : [])];
 ---
 <!doctype html>
 <html lang={lang}>
