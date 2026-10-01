@@ -18,7 +18,7 @@ pages: 46
 langue: fr
 source: ''
 identifiant: ''
-fichier: ''
+fichier: /media/documents/or-invisible-du-mali-note-analyse.pdf
 lien: ''
 couverture: ''
 en_avant: true
