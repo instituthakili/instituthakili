@@ -15,7 +15,7 @@ export async function GET({ site }) {
       );
     }
   };
-  ['accueil', 'institut', 'axes', 'indices', 'publications', 'mediatheque', 'actualites', 'contact', 'mentions'].forEach((k) => ajouter(k));
+  ['accueil', 'bienvenue', 'institut', 'axes', 'indices', 'publications', 'mediatheque', 'actualites', 'contact', 'mentions'].forEach((k) => ajouter(k));
   c.indices.forEach((x) => ajouter('indice', x.slug));
   c.publications.forEach((x) => ajouter('publication', x.slug));
   c.videos.forEach((x) => ajouter('video', x.slug));
