@@ -1,0 +1,371 @@
+---
+// Carrousel horizontal des indices HAKILI : défilement au doigt, à la souris (glisser), au clavier
+// et par les flèches. Le défilement automatique, discret, s'interrompt au survol, à la mise au point
+// et dès que le visiteur prend la main ; il est désactivé si l'appareil demande moins d'animations.
+import Icone from './Icone.astro';
+import IllustrationIndice from './IllustrationIndice.astro';
+import { UI, route, libelle } from '../lib/i18n.js';
+import { url, tr, typo, media } from '../lib/content.js';
+
+interface Props { indices: any[]; lang: 'fr' | 'en'; titre?: string; texte?: string }
+const { indices, lang, titre, texte } = Astro.props;
+const t = UI[lang];
+const parIdentifiant: Record<string, string> = {
+  ihrd: 'democratie',
+  ihrtb: 'budget',
+  'its-afrique': 'relations',
+  'barometre-charte-nationale': 'barometre',
+};
+const diapos = indices.map((i: any) => ({
+  lien: url(route('indice', lang, i.slug)),
+  sigle: tr(i.data, 'sigle', lang),
+  nom: tr(i.data, 'nom', lang),
+  accroche: tr(i.data, 'accroche', lang),
+  statut: i.data.statut,
+  image: media(i.data.image),
+  motif: i.data.illustration || parIdentifiant[i.slug] || 'generique',
+  chiffres: (i.data.chiffres || []).filter((c: any) => c && c.valeur),
+}));
+const libelles = {
+  aller: t.allerIndice('{n}', '{total}'),
+  pause: t.pauseDefilement,
+  lecture: t.lancerDefilement,
+};
+---
+<section class="section section--teinte carrousel-indices" aria-labelledby="titre-indices">
+  <div class="conteneur">
+    <div class="tete-section">
+      <div class="tete-section__texte">
+        <p class="surtitre">{lang === 'fr' ? 'Mesurer' : 'Measuring'}</p>
+        <h2 id="titre-indices">{titre || t.rubriques.indices}</h2>
+        {texte && <p>{texte}</p>}
+      </div>
+      <div class="carrousel__fleches" data-commandes hidden>
+        <button type="button" class="carrousel__fleche" data-precedent aria-controls="piste-indices">
+          <Icone nom="chevron-gauche" /><span class="visuellement-cache">{t.indicePrecedent}</span>
+        </button>
+        <button type="button" class="carrousel__fleche" data-suivant aria-controls="piste-indices">
+          <Icone nom="chevron-droite" /><span class="visuellement-cache">{t.indiceSuivant}</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="carrousel" data-carrousel role="region" aria-roledescription={lang === 'fr' ? 'carrousel' : 'carousel'} aria-label={t.carrousel} data-libelles={JSON.stringify(libelles)}>
+    <ul class="carrousel__piste" id="piste-indices" data-piste tabindex="0">
+      {diapos.map((d, n) => (
+        <li class="carrousel__diapo" style={`--rang:${n}`}>
+          <article class="diapo">
+            <div class="diapo__visuel">
+              {d.image ? <img src={d.image} alt="" loading="lazy" decoding="async" draggable="false" /> : <IllustrationIndice motif={d.motif} />}
+            </div>
+            <div class="diapo__corps">
+              <div class="diapo__tete">
+                <span class="diapo__sigle">{d.sigle}</span>
+                {d.statut && (
+                  <span class:list={['pastille', { 'pastille--terre': d.statut === 'conception' }]}>
+                    <span class="pastille__point"></span>{libelle('statutsIndice', d.statut, lang)}
+                  </span>
+                )}
+              </div>
+              <h3 class="diapo__nom"><a href={d.lien} draggable="false">{d.nom}</a></h3>
+              {d.accroche && <p class="diapo__accroche">{d.accroche}</p>}
+              {d.chiffres.length > 0 && (
+                <ul class="diapo__chiffres">
+                  {d.chiffres.map((c: any) => (
+                    <li><strong>{c.valeur}</strong><span>{typo((lang === 'en' && c.libelle_en) || c.libelle)}</span></li>
+                  ))}
+                </ul>
+              )}
+              <span class="lien-fleche diapo__suite" aria-hidden="true">{t.voirFiche}<Icone nom="fleche-droite" /></span>
+            </div>
+          </article>
+        </li>
+      ))}
+    </ul>
+  </div>
+
+  <div class="conteneur carrousel__pied">
+    <div class="carrousel__navigation" data-navigation hidden>
+      <div class="carrousel__points" data-points></div>
+      <button type="button" class="carrousel__lecture" data-lecture>
+        <span class="carrousel__icone-pause"><Icone nom="pause" /></span>
+        <span class="carrousel__icone-lecture"><Icone nom="lecture" /></span>
+        <span class="visuellement-cache" data-lecture-libelle>{t.pauseDefilement}</span>
+      </button>
+    </div>
+    <a class="lien-fleche" href={url(route('indices', lang))}>{t.tousIndices}<Icone nom="fleche-droite" /></a>
+  </div>
+</section>
+
+<script>
+  const DUREE = 6500;
+
+  const initialiser = (racine) => {
+    const section = racine.closest('section');
+    const piste = racine.querySelector('[data-piste]');
+    if (!section || !piste) return;
+    const diapos = Array.from(piste.children);
+    const commandes = section.querySelector('[data-commandes]');
+    const navigation = section.querySelector('[data-navigation]');
+    const zonePoints = section.querySelector('[data-points]');
+    const precedent = section.querySelector('[data-precedent]');
+    const suivant = section.querySelector('[data-suivant]');
+    const lecture = section.querySelector('[data-lecture]');
+    const lectureLibelle = section.querySelector('[data-lecture-libelle]');
+    const libelles = JSON.parse(racine.getAttribute('data-libelles') || '{}');
+    const reduit = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+    let positions = [];
+    let premiers = [];
+    let page = 0;
+    let actif = !reduit.matches;
+    let survol = false;
+    let focus = false;
+    let visible = false;
+    let ecoule = 0;
+    let dernier = null;
+    let boucle = null;
+    let glisse = null;
+    let bloquerClic = false;
+
+    const comportement = () => (reduit.matches ? 'auto' : 'smooth');
+
+    const pageProche = () => {
+      const x = piste.scrollLeft;
+      let k = 0;
+      positions.forEach((p, n) => {
+        if (Math.abs(p - x) < Math.abs(positions[k] - x)) k = n;
+      });
+      return k;
+    };
+
+    const mettreAJour = () => {
+      if (!positions.length) return;
+      page = pageProche();
+      Array.from(zonePoints.children).forEach((b, n) => {
+        if (n === page) b.setAttribute('aria-current', 'true');
+        else b.removeAttribute('aria-current');
+      });
+      precedent?.setAttribute('aria-disabled', String(page === 0));
+      suivant?.setAttribute('aria-disabled', String(page === positions.length - 1));
+    };
+
+    const aller = (k) => {
+      const cible = Math.max(0, Math.min(positions.length - 1, k));
+      piste.scrollTo({ left: positions[cible], behavior: comportement() });
+    };
+
+    const calculer = () => {
+      const max = piste.scrollWidth - piste.clientWidth;
+      const bord = diapos[0] ? diapos[0].offsetLeft : 0;
+      positions = [];
+      premiers = [];
+      diapos.forEach((d, n) => {
+        const p = Math.max(0, Math.min(max, d.offsetLeft - bord));
+        if (!positions.length || p - positions[positions.length - 1] > 8) {
+          positions.push(p);
+          premiers.push(n);
+        }
+      });
+      const utile = positions.length > 1;
+      if (commandes) commandes.hidden = !utile;
+      if (navigation) navigation.hidden = !utile;
+      zonePoints.replaceChildren(
+        ...positions.map((_, k) => {
+          const b = document.createElement('button');
+          b.type = 'button';
+          b.className = 'carrousel__point';
+          b.setAttribute('aria-label', String(libelles.aller || '').replace('{n}', String(premiers[k] + 1)).replace('{total}', String(diapos.length)));
+          const barre = document.createElement('span');
+          barre.className = 'carrousel__barre';
+          b.append(barre);
+          b.addEventListener('click', () => {
+            arreter();
+            aller(k);
+          });
+          return b;
+        })
+      );
+      mettreAJour();
+      relancer();
+    };
+
+    // Défilement automatique, mesuré image par image pour rester synchrone avec la barre de progression.
+    const peutDefiler = () => actif && !survol && !focus && visible && !document.hidden && positions.length > 1;
+    const tic = (maintenant) => {
+      if (!peutDefiler()) {
+        boucle = null;
+        dernier = null;
+        return;
+      }
+      if (dernier !== null) ecoule += maintenant - dernier;
+      dernier = maintenant;
+      if (ecoule >= DUREE) {
+        ecoule = 0;
+        aller(page >= positions.length - 1 ? 0 : page + 1);
+      }
+      section.style.setProperty('--progression', String(Math.min(1, ecoule / DUREE)));
+      boucle = requestAnimationFrame(tic);
+    };
+    const relancer = () => {
+      if (!boucle && peutDefiler()) {
+        dernier = null;
+        boucle = requestAnimationFrame(tic);
+      }
+    };
+    const afficherLecture = () => {
+      racine.classList.toggle('est-automatique', actif);
+      section.classList.toggle('est-automatique', actif);
+      if (lectureLibelle) lectureLibelle.textContent = actif ? libelles.pause : libelles.lecture;
+    };
+    const arreter = () => {
+      if (!actif) return;
+      actif = false;
+      ecoule = 0;
+      afficherLecture();
+    };
+
+    precedent?.addEventListener('click', () => {
+      arreter();
+      if (page > 0) aller(page - 1);
+    });
+    suivant?.addEventListener('click', () => {
+      arreter();
+      if (page < positions.length - 1) aller(page + 1);
+    });
+    lecture?.addEventListener('click', () => {
+      actif = !actif;
+      ecoule = 0;
+      afficherLecture();
+      relancer();
+    });
+
+    let attente = false;
+    piste.addEventListener(
+      'scroll',
+      () => {
+        if (attente) return;
+        attente = true;
+        requestAnimationFrame(() => {
+          attente = false;
+          mettreAJour();
+        });
+      },
+      { passive: true }
+    );
+
+    // Glisser à la souris ; au doigt, le défilement natif prend le relais.
+    piste.addEventListener('pointerdown', (e) => {
+      bloquerClic = false;
+      if (e.pointerType !== 'mouse') {
+        arreter();
+        return;
+      }
+      if (e.button !== 0) return;
+      glisse = { x: e.clientX, depart: piste.scrollLeft, page, deplace: false, id: e.pointerId };
+    });
+    piste.addEventListener('pointermove', (e) => {
+      if (!glisse || e.pointerId !== glisse.id) return;
+      const dx = e.clientX - glisse.x;
+      if (!glisse.deplace && Math.abs(dx) > 6) {
+        glisse.deplace = true;
+        piste.setPointerCapture(e.pointerId);
+        piste.classList.add('est-glisse');
+        arreter();
+      }
+      if (glisse.deplace) {
+        piste.scrollLeft = glisse.depart - dx;
+        e.preventDefault();
+      }
+    });
+    const finGlisse = (e) => {
+      if (!glisse) return;
+      const { deplace, x, page: depart } = glisse;
+      glisse = null;
+      if (!deplace) return;
+      bloquerClic = true;
+      setTimeout(() => (bloquerClic = false), 80);
+      const dx = e.clientX - x;
+      let cible = pageProche();
+      if (dx < -40 && cible <= depart) cible = depart + 1;
+      if (dx > 40 && cible >= depart) cible = depart - 1;
+      aller(cible);
+      setTimeout(() => piste.classList.remove('est-glisse'), reduit.matches ? 0 : 450);
+    };
+    piste.addEventListener('pointerup', finGlisse);
+    piste.addEventListener('pointercancel', finGlisse);
+    piste.addEventListener(
+      'click',
+      (e) => {
+        if (bloquerClic) {
+          e.preventDefault();
+          e.stopPropagation();
+          bloquerClic = false;
+        }
+      },
+      true
+    );
+    piste.addEventListener('dragstart', (e) => e.preventDefault());
+    piste.addEventListener(
+      'wheel',
+      (e) => {
+        if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) arreter();
+      },
+      { passive: true }
+    );
+    piste.addEventListener('keydown', (e) => {
+      if (e.target !== piste) return;
+      const touches = { ArrowRight: page + 1, ArrowLeft: page - 1, Home: 0, End: positions.length - 1 };
+      if (!(e.key in touches)) return;
+      e.preventDefault();
+      arreter();
+      aller(touches[e.key]);
+    });
+
+    // Pauses passagères : survol, mise au point, section hors de l'écran, onglet masqué.
+    piste.addEventListener('pointerenter', (e) => {
+      if (e.pointerType === 'mouse') survol = true;
+    });
+    piste.addEventListener('pointerleave', () => {
+      survol = false;
+      relancer();
+    });
+    piste.addEventListener('focusin', () => (focus = true));
+    piste.addEventListener('focusout', (e) => {
+      if (!piste.contains(e.relatedTarget)) {
+        focus = false;
+        relancer();
+      }
+    });
+    document.addEventListener('visibilitychange', relancer);
+    reduit.addEventListener?.('change', () => {
+      if (reduit.matches) arreter();
+    });
+
+    if ('IntersectionObserver' in window) {
+      new IntersectionObserver(
+        (entrees) => {
+          entrees.forEach((en) => {
+            visible = en.isIntersecting;
+            if (visible) section.classList.add('est-visible');
+            relancer();
+          });
+        },
+        { threshold: 0.3 }
+      ).observe(racine);
+    } else {
+      visible = true;
+      section.classList.add('est-visible');
+    }
+
+    if ('ResizeObserver' in window) new ResizeObserver(() => calculer()).observe(piste);
+    else window.addEventListener('resize', calculer);
+
+    section.classList.add('est-pret');
+    afficherLecture();
+    calculer();
+  };
+
+  document.querySelectorAll('[data-carrousel]').forEach(initialiser);
+</script>
