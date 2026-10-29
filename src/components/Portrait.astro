@@ -1,0 +1,29 @@
+---
+// Portrait carré aux coins arrondis, avec une ombre discrète.
+// Tant qu'aucune photo n'est déposée dans l'administration, les initiales en tiennent lieu.
+import Logo from './Logo.astro';
+import { media } from '../lib/content.js';
+
+interface Props { personne: any; lang: 'fr' | 'en'; chargement?: 'eager' | 'lazy'; class?: string }
+const { personne, lang, chargement = 'lazy', class: cls = '' } = Astro.props;
+const nom = String(personne?.data?.nom || '').trim();
+const photo = media(personne?.data?.photo);
+const initiales = nom
+  .replace(/^(Dr|Pr|Prof\.?|Me|M\.|Mme|Mlle)\s+/i, '')
+  .split(/\s+/)
+  .filter(Boolean)
+  .slice(0, 2)
+  .map((m) => m.charAt(0).toUpperCase())
+  .join('');
+const texteAlt = lang === 'fr' ? `Portrait de ${nom}` : `Portrait of ${nom}`;
+---
+<figure class:list={['portrait', cls]}>
+  {photo ? (
+    <img src={photo} alt={texteAlt} width="720" height="720" loading={chargement} decoding="async" fetchpriority={chargement === 'eager' ? 'high' : undefined} />
+  ) : (
+    <div class="portrait__substitut" aria-hidden="true">
+      <span class="portrait__motif"><Logo symboleSeul /></span>
+      <span class="portrait__initiales">{initiales}</span>
+    </div>
+  )}
+</figure>
