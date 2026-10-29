@@ -32,6 +32,7 @@ const administration = reglages.adresse_administration || 'https://app.pagescms.
         <h2>{lang === 'fr' ? "L’institut" : 'The Institute'}</h2>
         <ul>
           <li><a href={url(route('institut', lang))}>{t.nav.institut}</a></li>
+          <li><a href={url(route('bienvenue', lang))}>{t.nav.bienvenue}</a></li>
           <li><a href={url(route('axes', lang))}>{t.nav.axes}</a></li>
           <li><a href={url(route('indices', lang))}>{t.nav.indices}</a></li>
           <li><a href={url(route('contact', lang))}>{t.nav.contact}</a></li>
