@@ -1,0 +1,253 @@
+---
+// Illustrations originales des indices, dessinées aux couleurs de l'institut (format 2:1).
+// Le motif se choisit dans l'administration ; une image déposée pour l'indice le remplace.
+interface Props { motif?: string; class?: string }
+const { motif = 'generique', class: cls = '' } = Astro.props;
+
+const r1 = (n: number) => Math.round(n * 10) / 10;
+type Pt = [number, number];
+
+// Afrique : contour simplifié (longitude, latitude), projection équirectangulaire.
+const cotes: Pt[] = [
+  [-5.9, 35.8], [-2.0, 35.1], [1.3, 36.5], [3.0, 36.8], [8.0, 36.9], [9.9, 37.3], [11.0, 36.9], [10.6, 35.8],
+  [10.8, 34.7], [10.1, 33.9], [11.1, 33.2], [13.2, 32.9], [15.2, 32.3], [16.6, 31.2], [18.4, 30.4], [19.6, 30.4],
+  [20.1, 31.0], [20.1, 32.1], [21.7, 32.9], [22.6, 32.8], [24.0, 32.1], [25.2, 31.6], [27.3, 31.4], [29.9, 31.2],
+  [32.3, 31.3], [32.6, 29.9], [33.8, 27.2], [35.5, 23.9], [37.2, 19.6], [37.7, 18.4], [39.5, 15.6], [42.7, 13.0],
+  [43.3, 11.8], [45.0, 10.4], [49.2, 11.3], [51.3, 11.8], [51.4, 10.4], [49.8, 7.9], [48.5, 5.3], [45.3, 2.0],
+  [42.5, -0.4], [40.9, -2.3], [39.7, -4.0], [39.3, -6.8], [39.5, -8.9], [39.7, -10.0], [40.5, -13.0], [40.7, -15.0],
+  [36.9, -17.9], [34.8, -19.8], [35.3, -22.0], [35.4, -23.9], [32.6, -25.9], [32.0, -28.8], [31.0, -29.9], [27.9, -33.0],
+  [25.6, -34.0], [22.1, -34.2], [20.0, -34.8], [18.5, -34.4], [17.9, -33.0], [16.5, -28.6], [15.2, -26.6], [14.5, -22.9],
+  [12.9, -19.0], [11.8, -17.3], [12.15, -15.2], [13.5, -12.4], [13.2, -8.8], [12.3, -6.0], [11.85, -4.8], [9.8, -2.5],
+  [8.7, -0.6], [9.4, 0.4], [9.9, 2.9], [9.7, 4.0], [8.3, 4.9], [6.1, 4.3], [4.7, 6.0], [3.4, 6.4],
+  [1.2, 6.1], [-0.2, 5.6], [-2.1, 4.75], [-4.0, 5.3], [-7.7, 4.4], [-10.8, 6.3], [-13.2, 8.5], [-13.7, 9.5],
+  [-15.6, 11.9], [-16.8, 12.6], [-16.7, 13.45], [-17.5, 14.7], [-16.5, 16.0], [-16.0, 18.1], [-16.4, 19.6], [-17.05, 20.8],
+  [-15.9, 23.7], [-14.5, 26.1], [-12.9, 27.9], [-11.1, 28.5], [-10.2, 29.4], [-9.6, 30.4], [-9.77, 31.5], [-8.5, 33.25],
+  [-7.6, 33.6], [-6.8, 34.0], [-6.15, 35.2],
+];
+const madagascar: Pt[] = [
+  [49.3, -12.0], [50.2, -14.3], [50.5, -15.3], [49.4, -17.4], [49.4, -18.1], [48.0, -22.1], [47.0, -25.0], [45.15, -25.6],
+  [44.0, -25.0], [43.67, -23.35], [43.37, -21.75], [44.28, -20.28], [44.0, -18.06], [44.45, -16.18], [46.3, -15.7], [47.76, -14.63],
+  [48.27, -13.4],
+];
+const ECHELLE = 2.44;
+const projeter = ([lon, lat]: Pt): Pt => [r1(88 + (lon + 17.6) * ECHELLE), r1(62 + (37.4 - lat) * ECHELLE)];
+const trace = (pts: Pt[]) => 'M' + pts.map((p) => projeter(p).join(' ')).join('L') + 'Z';
+const afrique = trace(cotes) + trace(madagascar);
+
+// Courbes de Bézier quadratiques : point et direction à une position t.
+const bezier = (a: Pt, b: Pt, c: Pt, t: number): Pt => [
+  (1 - t) ** 2 * a[0] + 2 * (1 - t) * t * b[0] + t * t * c[0],
+  (1 - t) ** 2 * a[1] + 2 * (1 - t) * t * b[1] + t * t * c[1],
+];
+const angleEn = (a: Pt, b: Pt, c: Pt, t: number) => {
+  const dx = 2 * (1 - t) * (b[0] - a[0]) + 2 * t * (c[0] - b[0]);
+  const dy = 2 * (1 - t) * (b[1] - a[1]) + 2 * t * (c[1] - b[1]);
+  return (Math.atan2(dy, dx) * 180) / Math.PI;
+};
+// Deux cercles reliés par des flux : l'Afrique (centre 172, 150) et les pays développés (centre 470, 150).
+const surCercle = (cx: number, cy: number, rr: number, deg: number): Pt => [
+  r1(cx + rr * Math.cos((deg * Math.PI) / 180)),
+  r1(cy + rr * Math.sin((deg * Math.PI) / 180)),
+];
+const flux = [
+  { de: surCercle(172, 150, 112, -38), par: [338, 22] as Pt, vers: surCercle(470, 150, 68, 214), cls: 'ill-flux-terre', marques: [true, false] },
+  { de: surCercle(470, 150, 68, 146), par: [338, 278] as Pt, vers: surCercle(172, 150, 112, 38), cls: 'ill-flux-vert', marques: [true, false] },
+].map((f) => ({
+  ...f,
+  d: `M${f.de.join(' ')}Q${f.par.join(' ')} ${f.vers.join(' ')}`,
+  pointe: { x: f.vers[0], y: f.vers[1], a: r1(angleEn(f.de, f.par, f.vers, 1)) },
+  reperes: [0.36, 0.64].map((t, n) => {
+    const [x, y] = bezier(f.de, f.par, f.vers, t);
+    return { x: r1(x), y: r1(y), plein: f.marques[n] };
+  }),
+}));
+
+// Jauge du baromètre.
+const CX = 300;
+const CY = 212;
+const RAYON = 116;
+const polaire = (deg: number, rr: number): Pt => [r1(CX + rr * Math.cos((deg * Math.PI) / 180)), r1(CY + rr * Math.sin((deg * Math.PI) / 180))];
+const segments = ['ill-terre', 'ill-terre-claire', 'ill-sable', 'ill-vert-clair', 'ill-vert'].map((cls, n) => {
+  const a = polaire(180 + n * 36 + 1.2, RAYON);
+  const b = polaire(180 + (n + 1) * 36 - 1.2, RAYON);
+  return { cls, d: `M${a.join(' ')}A${RAYON} ${RAYON} 0 0 1 ${b.join(' ')}` };
+});
+const graduationsJauge = Array.from({ length: 21 }, (_, n) => {
+  const deg = 180 + n * 9;
+  const longue = n % 5 === 0;
+  const a = polaire(deg, longue ? 84 : 91);
+  const b = polaire(deg, 99);
+  return { x1: a[0], y1: a[1], x2: b[0], y2: b[1], longue };
+});
+const aiguille = polaire(295, 94);
+// Rameaux d'olivier : paires de feuilles effilées le long d'une tige, et une feuille terminale.
+const FEUILLE = 'M0 0Q8.5 -6.5 17 0Q8.5 6.5 0 0Z';
+const feuilles = (sens: 1 | -1) => {
+  const a: Pt = [300 - sens * 9, 264];
+  const b: Pt = [300 - sens * 70, 266];
+  const c: Pt = [300 - sens * 112, 222];
+  const liste: { x: number; y: number; a: number; clair: boolean }[] = [];
+  [0.18, 0.4, 0.62, 0.84].forEach((t) => {
+    const [x, y] = bezier(a, b, c, t);
+    const tangente = angleEn(a, b, c, t);
+    liste.push({ x: r1(x), y: r1(y), a: r1(tangente - sens * 40), clair: false });
+    liste.push({ x: r1(x), y: r1(y), a: r1(tangente + sens * 40), clair: true });
+  });
+  liste.push({ x: c[0], y: c[1], a: r1(angleEn(a, b, c, 1)), clair: false });
+  return { d: `M${a.join(' ')}Q${b.join(' ')} ${c.join(' ')}`, liste };
+};
+const rameaux = [feuilles(1), feuilles(-1)];
+
+// Motif générique : anneaux du logo et couronne de graduations.
+const couronne = Array.from({ length: 60 }, (_, n) => {
+  const deg = n * 6 - 90;
+  const longue = n % 5 === 0;
+  const rr = (k: number) => polaireCentre(deg, k);
+  return { a: rr(longue ? 88 : 93), b: rr(98), longue };
+});
+function polaireCentre(deg: number, rr: number): Pt {
+  return [r1(300 + rr * Math.cos((deg * Math.PI) / 180)), r1(150 + rr * Math.sin((deg * Math.PI) / 180))];
+}
+
+const motifs = ['democratie', 'budget', 'relations', 'barometre', 'generique'];
+const m = motifs.includes(motif) ? motif : 'generique';
+---
+<svg class:list={['illustration', `illustration--${m}`, cls]} viewBox="0 0 600 300" preserveAspectRatio="xMidYMid slice" aria-hidden="true" focusable="false">
+  {m === 'democratie' && (
+    <g>
+      <rect width="600" height="300" class="ill-fond-vert" />
+      <g class="ill-cercles" fill="none">
+        <circle cx="548" cy="26" r="62" /><circle cx="548" cy="26" r="104" /><circle cx="548" cy="26" r="146" />
+        <circle cx="46" cy="282" r="46" /><circle cx="46" cy="282" r="82" />
+      </g>
+      <path d="M88 252A212 212 0 0 1 512 252" fill="none" class="ill-trait-blanc" stroke-width="2" />
+      <path d="M104 252A196 196 0 0 1 496 252" fill="none" class="ill-trait-vert-clair" stroke-width="9" stroke-linecap="round" />
+      <line x1="80" y1="252" x2="520" y2="252" class="ill-sol" stroke-width="2" />
+      <rect x="192" y="238" width="216" height="14" rx="2" class="ill-vert-nuit" />
+      <rect x="204" y="226" width="192" height="12" rx="2" class="ill-vert-fonce" />
+      {[222, 256, 290, 324].map((x) => <rect x={x} y="132" width="20" height="94" class="ill-vert" />)}
+      <rect x="358" y="184" width="20" height="42" class="ill-terre" />
+      <g class="ill-erosion">
+        <rect x="366" y="168" width="9" height="9" class="ill-terre" opacity="0.9" />
+        <rect x="381" y="153" width="9" height="9" class="ill-terre" opacity="0.7" />
+        <rect x="398" y="141" width="8" height="8" class="ill-terre" opacity="0.5" />
+        <rect x="416" y="131" width="7" height="7" class="ill-terre" opacity="0.32" />
+        <rect x="436" y="123" width="6" height="6" class="ill-terre" opacity="0.18" />
+      </g>
+      {[222, 256, 290, 324, 358].map((x) => <rect x={x - 4} y="125" width="28" height="8" rx="2" class="ill-vert-fonce" />)}
+      <rect x="206" y="112" width="188" height="14" rx="2" class="ill-vert-fonce" />
+      <path d="M198 112L300 70L402 112Z" class="ill-vert-nuit" />
+      <circle cx="300" cy="97" r="7" class="ill-terre-claire" />
+    </g>
+  )}
+
+  {m === 'budget' && (
+    <g>
+      <rect width="600" height="300" class="ill-fond-terre" />
+      <g class="ill-cercles" fill="none">
+        <circle cx="40" cy="284" r="70" /><circle cx="40" cy="284" r="112" /><circle cx="40" cy="284" r="154" />
+        <circle cx="560" cy="20" r="54" />
+      </g>
+      <rect x="152" y="62" width="176" height="196" rx="14" class="ill-ombre-terre" />
+      <rect x="144" y="52" width="176" height="196" rx="14" class="ill-blanc" />
+      <rect x="166" y="76" width="88" height="10" rx="5" class="ill-vert" />
+      <rect x="166" y="100" width="132" height="7" rx="3.5" class="ill-ligne" />
+      <rect x="166" y="116" width="112" height="7" rx="3.5" class="ill-ligne" />
+      <rect x="166" y="132" width="124" height="7" rx="3.5" class="ill-ligne" />
+      <circle cx="190" cy="198" r="24" fill="none" class="ill-trait-vert-clair" stroke-width="10" />
+      <circle cx="190" cy="198" r="24" fill="none" class="ill-trait-terre" stroke-width="10" stroke-dasharray="60 151" transform="rotate(-90 190 198)" />
+      <rect x="228" y="184" width="70" height="7" rx="3.5" class="ill-ligne" />
+      <rect x="228" y="200" width="54" height="7" rx="3.5" class="ill-ligne" />
+      <rect x="228" y="216" width="62" height="7" rx="3.5" class="ill-ligne" />
+      <line x1="372" y1="246" x2="502" y2="246" class="ill-sol" stroke-width="2" />
+      <g class="ill-barres">
+        <rect x="380" y="196" width="20" height="50" rx="4" class="ill-vert-clair" />
+        <rect x="408" y="168" width="20" height="78" rx="4" class="ill-vert" />
+        <rect x="436" y="182" width="20" height="64" rx="4" class="ill-vert-clair" />
+        <rect x="464" y="134" width="20" height="112" rx="4" class="ill-vert" />
+      </g>
+      <polyline points="390,184 418,156 446,170 474,122" fill="none" class="ill-trait-terre" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round" />
+      {[[390, 184], [418, 156], [446, 170], [474, 122]].map(([x, y]) => <circle cx={x} cy={y} r="5" class="ill-blanc ill-trait-terre" stroke-width="3" />)}
+      <circle cx="300" cy="132" r="40" class="ill-loupe" />
+      <circle cx="300" cy="132" r="40" fill="none" class="ill-trait-vert-nuit" stroke-width="9" />
+      <path d="M279 118A24 24 0 0 1 297 106" fill="none" class="ill-trait-blanc" stroke-width="4" stroke-linecap="round" />
+      <line x1="330" y1="162" x2="360" y2="192" class="ill-trait-vert-nuit" stroke-width="14" stroke-linecap="round" />
+    </g>
+  )}
+
+  {m === 'relations' && (
+    <g>
+      <rect width="600" height="300" class="ill-fond-vert" />
+      <g class="ill-cercles" fill="none">
+        <circle cx="470" cy="150" r="84" /><circle cx="470" cy="150" r="106" />
+        <circle cx="566" cy="292" r="58" />
+      </g>
+      <circle cx="172" cy="150" r="108" class="ill-voile" />
+      <path d={afrique} class="ill-vert" />
+      <circle cx="470" cy="150" r="62" class="ill-blanc" />
+      <g fill="none" class="ill-trait-vert-clair" stroke-width="2">
+        <ellipse cx="470" cy="150" rx="25" ry="62" />
+        <ellipse cx="470" cy="150" rx="46" ry="62" />
+        <line x1="470" y1="88" x2="470" y2="212" />
+        <line x1="408" y1="150" x2="532" y2="150" />
+        <line x1="416.3" y1="119" x2="523.7" y2="119" />
+        <line x1="416.3" y1="181" x2="523.7" y2="181" />
+      </g>
+      <circle cx="470" cy="150" r="62" fill="none" class="ill-trait-vert-fonce" stroke-width="3" />
+      {flux.map((f) => (
+        <g class={f.cls}>
+          <path d={f.d} fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" />
+          <path d="M0 0L-15 -7.5L-15 7.5Z" fill="currentColor" transform={`translate(${f.pointe.x} ${f.pointe.y}) rotate(${f.pointe.a})`} />
+          {f.reperes.map((p) => (
+            <circle cx={p.x} cy={p.y} r="6.5" fill={p.plein ? 'currentColor' : '#ffffff'} stroke="currentColor" stroke-width="3" />
+          ))}
+        </g>
+      ))}
+    </g>
+  )}
+
+  {m === 'barometre' && (
+    <g>
+      <rect width="600" height="300" class="ill-fond-terre" />
+      <g class="ill-cercles" fill="none">
+        <circle cx="54" cy="24" r="58" /><circle cx="54" cy="24" r="100" /><circle cx="54" cy="24" r="142" />
+        <circle cx="560" cy="286" r="58" />
+      </g>
+      <circle cx="300" cy="212" r="146" class="ill-voile" />
+      {segments.map((s) => <path d={s.d} fill="none" class={`ill-trait-${s.cls.replace('ill-', '')}`} stroke-width="22" />)}
+      <g class="ill-trait-vert-fonce" opacity="0.5">
+        {graduationsJauge.map((g) => <line x1={g.x1} y1={g.y1} x2={g.x2} y2={g.y2} stroke-width={g.longue ? 2.6 : 1.6} />)}
+      </g>
+      {rameaux.map((r) => (
+        <g>
+          <path d={r.d} fill="none" class="ill-trait-vert-fonce" stroke-width="3" stroke-linecap="round" />
+          {r.liste.map((f) => <path d={FEUILLE} transform={`translate(${f.x} ${f.y}) rotate(${f.a})`} class={f.clair ? 'ill-vert-moyen' : 'ill-vert'} />)}
+        </g>
+      ))}
+      <circle cx="300" cy="264" r="4.5" class="ill-terre" />
+      <g class="ill-aiguille">
+        <line x1={CX} y1={CY} x2={aiguille[0]} y2={aiguille[1]} class="ill-trait-vert-nuit" stroke-width="6" stroke-linecap="round" />
+      </g>
+      <circle cx={CX} cy={CY} r="14" class="ill-vert-nuit" />
+      <circle cx={CX} cy={CY} r="5" class="ill-terre-claire" />
+    </g>
+  )}
+
+  {m === 'generique' && (
+    <g>
+      <rect width="600" height="300" class="ill-fond-neutre" />
+      <g class="ill-cercles" fill="none">
+        <circle cx="300" cy="150" r="124" /><circle cx="300" cy="150" r="168" /><circle cx="300" cy="150" r="212" />
+      </g>
+      <g class="ill-trait-vert-fonce" opacity="0.45">
+        {couronne.map((g) => <line x1={g.a[0]} y1={g.a[1]} x2={g.b[0]} y2={g.b[1]} stroke-width={g.longue ? 2.4 : 1.4} />)}
+      </g>
+      <g transform="translate(300 150) scale(0.86) translate(-100 -100)" fill="none" stroke-width="13" stroke-linecap="round">
+        <circle cx="100" cy="100" r="82" class="ill-trait-vert" stroke-dasharray="403.59 111.63" transform="rotate(51 100 100)" />
+        <circle cx="100" cy="100" r="56" class="ill-trait-terre" stroke-dasharray="281.49 70.37" transform="rotate(171 100 100)" />
+        <circle cx="100" cy="100" r="30" class="ill-trait-vert" stroke-dasharray="153.94 34.56" transform="rotate(291 100 100)" />
+      </g>
+      <circle cx="300" cy="150" r="7.7" class="ill-vert" />
+    </g>
+  )}
+</svg>
