@@ -69,7 +69,7 @@ const autres = c.indices.filter((x) => x.slug !== slug);
           <a class="lien-fleche" href={url(route('indices', lang))}>{t.tousIndices}<Icone nom="fleche-droite" /></a>
         </div>
         <ul class="etiquettes">
-          {autres.map((x) => <li><a class="pastille pastille--contour" style="font-size:.9rem;padding:8px 14px;text-decoration:none" href={url(route('indice', lang, x.slug))}>{tr(x.data, 'sigle', lang)} · {tr(x.data, 'nom', lang)}</a></li>)}
+          {autres.map((x) => <li><a class="pastille pastille--contour pastille--longue" style="font-size:.9rem;padding:8px 14px;text-decoration:none" href={url(route('indice', lang, x.slug))}>{tr(x.data, 'sigle', lang)} · {tr(x.data, 'nom', lang)}</a></li>)}
         </ul>
       </div>
     </section>
