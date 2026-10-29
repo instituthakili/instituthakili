@@ -30,13 +30,13 @@ const etapes = page.etapes || [];
   <section class="section">
     <div class="conteneur colonnes">
       <div class="pile" style="gap:56px">
-        <div class="pile" style="gap:20px">
-          <h2>{tr(page, 'mission_titre', lang)}</h2>
-          <div class="prose" set:html={md(tr(page, 'mission', lang))} />
-        </div>
-        <div class="pile" style="gap:20px">
+        <div class="pile" style="gap:20px" id="historique">
           <h2>{tr(page, 'nom_titre', lang)}</h2>
           <div class="prose" set:html={md(tr(page, 'nom_texte', lang))} />
+        </div>
+        <div class="pile" style="gap:20px" id="mission">
+          <h2>{tr(page, 'mission_titre', lang)}</h2>
+          <div class="prose" set:html={md(tr(page, 'mission', lang))} />
         </div>
       </div>
       <aside class="colonne-collante">
@@ -56,7 +56,7 @@ const etapes = page.etapes || [];
   </section>
 
   {etapes.length > 0 && (
-    <section class="section section--teinte">
+    <section class="section section--teinte" id="demarche">
       <div class="conteneur">
         <div class="tete-section">
           <div class="tete-section__texte">
@@ -77,10 +77,10 @@ const etapes = page.etapes || [];
     </section>
   )}
 
-  <section class="section" id="direction">
+  <section class="section" id="organes">
     <div class="conteneur grille-2">
       <div class="pile" style="gap:20px">
-        <p class="surtitre">{lang === 'fr' ? 'Organes' : 'Bodies'}</p>
+        <p class="surtitre">{t.rubriques.organes}</p>
         <h2>{tr(page, 'gouvernance_titre', lang)}</h2>
         <div class="prose" set:html={md(tr(page, 'gouvernance', lang))} />
       </div>
