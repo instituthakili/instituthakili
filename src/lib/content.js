@@ -7,6 +7,7 @@ import accueilBrut from '../../contenu/pages/accueil.json';
 import institutBrut from '../../contenu/pages/institut.json';
 import axesBrut from '../../contenu/pages/axes.json';
 import contactBrut from '../../contenu/pages/contact.json';
+import bienvenueBrut from '../../contenu/pages/bienvenue.json';
 
 marked.setOptions({ gfm: true, breaks: false });
 
@@ -194,6 +195,7 @@ export async function contenus() {
       institut: institutBrut || {},
       axes: axesBrut || {},
       contact: contactBrut || {},
+      bienvenue: bienvenueBrut || {},
     },
   };
   return cache;

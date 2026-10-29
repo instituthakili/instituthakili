@@ -60,6 +60,7 @@ content:
             - { name: etude, label: "Étude" }
             - { name: rapport, label: "Rapport" }
             - { name: article, label: "Article scientifique" }
+            - { name: resultats-recherche, label: "Résultats des travaux de recherche" }
             - { name: ouvrage, label: "Ouvrage" }
             - { name: politique, label: "Papier de politique publique" }
             - { name: methodologie, label: "Document méthodologique" }
@@ -310,7 +311,7 @@ content:
 
   # ------------------------------------------------------------------
   - name: videos
-    label: Médiathèque
+    label: Vidéothèque
     type: collection
     path: contenu/videos
     format: yaml-frontmatter
@@ -418,6 +419,23 @@ content:
       - name: perimetre
         label: Périmètre
         type: string
+      - name: image
+        label: Image du carrousel
+        description: Facultatif. Remplace l'illustration dessinée dans le carrousel de la page d'accueil. Format paysage conseillé (deux fois plus large que haut).
+        type: image
+        options:
+          media: images
+      - name: illustration
+        label: Illustration dessinée
+        description: Facultatif. Dessin affiché dans le carrousel lorsqu'aucune image n'est déposée.
+        type: select
+        options:
+          values:
+            - { name: democratie, label: "Institutions et démocratie" }
+            - { name: budget, label: "Budget et finances publiques" }
+            - { name: relations, label: "Relations entre l'Afrique et le monde" }
+            - { name: barometre, label: "Baromètre et suivi" }
+            - { name: generique, label: "Motif de l'institut" }
       - name: chiffres
         label: Chiffres clés
         description: Par exemple 9 pays, 44 indicateurs.
@@ -503,7 +521,7 @@ content:
         type: number
       - name: photo
         label: Photo
-        description: Facultatif. Format carré conseillé.
+        description: Facultatif. Format carré conseillé. La photo du Directeur exécutif s'affiche en ouverture de la page d'accueil et sur la page du mot de bienvenue.
         type: image
         options:
           media: images
@@ -544,24 +562,33 @@ content:
     path: contenu/pages/accueil.json
     format: json
     fields:
-      - { name: surtitre, label: Petite ligne au-dessus du titre, type: string }
-      - { name: titre, label: Grand titre, type: string }
-      - { name: texte, label: Texte de présentation, type: text }
+      - name: texte
+        label: Description de la page d'accueil
+        description: Texte court repris par les moteurs de recherche. La photo, le nom et la fonction affichés en ouverture proviennent de la fiche du Directeur exécutif (rubrique Direction et conseil).
+        type: text
       - { name: indices_titre, label: Titre de la rubrique indices, type: string }
       - { name: indices_texte, label: Texte de la rubrique indices, type: text }
-      - { name: axes_titre, label: Titre de la rubrique axes, type: string }
-      - { name: axes_texte, label: Texte de la rubrique axes, type: text }
       - { name: appel_titre, label: Titre du bandeau final, type: string }
       - { name: appel_texte, label: Texte du bandeau final, type: text }
-      - { name: surtitre_en, label: Petite ligne en anglais, type: string }
-      - { name: titre_en, label: Grand titre en anglais, type: string }
-      - { name: texte_en, label: Texte de présentation en anglais, type: text }
+      - { name: texte_en, label: Description en anglais, type: text }
       - { name: indices_titre_en, label: Titre de la rubrique indices en anglais, type: string }
       - { name: indices_texte_en, label: Texte de la rubrique indices en anglais, type: text }
-      - { name: axes_titre_en, label: Titre de la rubrique axes en anglais, type: string }
-      - { name: axes_texte_en, label: Texte de la rubrique axes en anglais, type: text }
       - { name: appel_titre_en, label: Titre du bandeau final en anglais, type: string }
       - { name: appel_texte_en, label: Texte du bandeau final en anglais, type: text }
+
+  - name: page_bienvenue
+    label: Mot de bienvenue du Directeur
+    type: file
+    path: contenu/pages/bienvenue.json
+    format: json
+    fields:
+      - { name: titre, label: Titre, type: string }
+      - name: texte
+        label: Texte du mot de bienvenue
+        description: La photo, le nom et la fonction du signataire proviennent de la fiche du Directeur exécutif (rubrique Direction et conseil).
+        type: rich-text
+      - { name: titre_en, label: Titre en anglais, type: string }
+      - { name: texte_en, label: Texte en anglais, type: rich-text }
 
   - name: page_institut
     label: Page L'institut
@@ -573,8 +600,8 @@ content:
       - { name: intro_texte, label: Introduction, type: text }
       - { name: mission_titre, label: Titre de la mission, type: string }
       - { name: mission, label: Mission, type: rich-text }
-      - { name: nom_titre, label: Titre de la partie sur le nom, type: string }
-      - { name: nom_texte, label: Origine et nom, type: rich-text }
+      - { name: nom_titre, label: Titre de l'historique, type: string }
+      - { name: nom_texte, label: Historique, type: rich-text }
       - { name: demarche_titre, label: Titre de la démarche, type: string }
       - { name: demarche_texte, label: Introduction de la démarche, type: text }
       - name: etapes
@@ -593,8 +620,8 @@ content:
       - { name: intro_texte_en, label: Introduction en anglais, type: text }
       - { name: mission_titre_en, label: Titre de la mission en anglais, type: string }
       - { name: mission_en, label: Mission en anglais, type: rich-text }
-      - { name: nom_titre_en, label: Titre de la partie sur le nom en anglais, type: string }
-      - { name: nom_texte_en, label: Origine et nom en anglais, type: rich-text }
+      - { name: nom_titre_en, label: Titre de l'historique en anglais, type: string }
+      - { name: nom_texte_en, label: Historique en anglais, type: rich-text }
       - { name: demarche_titre_en, label: Titre de la démarche en anglais, type: string }
       - { name: demarche_texte_en, label: Introduction de la démarche en anglais, type: text }
       - { name: gouvernance_titre_en, label: Titre de la gouvernance en anglais, type: string }
@@ -626,7 +653,7 @@ content:
                 - { name: publications, label: "Publications" }
                 - { name: indices, label: "Indices" }
                 - { name: actualites, label: "Actualités" }
-                - { name: mediatheque, label: "Médiathèque" }
+                - { name: mediatheque, label: "Vidéothèque" }
           - { name: nom_en, label: Nom en anglais, type: string }
           - { name: accroche_en, label: Accroche en anglais, type: string }
           - { name: texte_en, label: Présentation en anglais, type: text }

@@ -11,7 +11,9 @@ const t = UI[lang];
 const c = await contenus();
 const alterne = url(route(cle, lang === 'fr' ? 'en' : 'fr'));
 const pubs = c.publications;
-const types = [...new Set(pubs.map((p) => p.type))].filter(Boolean);
+// Tous les types figurent dans la liste, dans l'ordre du menu, afin que chaque sous-rubrique trouve son filtre.
+const ordreTypes = ['article', 'resultats-recherche', 'note-analyse', 'etude', 'rapport', 'ouvrage', 'politique', 'methodologie'];
+const types = [...new Set([...ordreTypes, ...pubs.map((p) => p.type)])].filter(Boolean);
 const themes = [...new Set(pubs.flatMap((p) => p.themes))].filter(Boolean);
 const annees = [...new Set(pubs.map((p) => (p.date ? p.date.getUTCFullYear() : null)).filter(Boolean))].sort((a, b) => b - a);
 const intro = lang === 'fr'
@@ -69,7 +71,7 @@ const intro = lang === 'fr'
   const lignes = Array.from(document.querySelectorAll('[data-publication]'));
   const compte = document.querySelector('[data-compte]');
   const aucun = document.querySelector('[data-aucun]');
-  if (form && lignes.length) {
+  if (form) {
     const libelles = JSON.parse(compte?.getAttribute('data-libelles') || '{}');
     const normaliser = (s) => (s || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[\u2018\u2019]/g, "'").replace(/\u2060/g, '');
     const lire = (nom) => form.querySelector(`[data-filtre="${nom}"]`)?.value || '';
@@ -91,8 +93,30 @@ const intro = lang === 'fr'
       if (compte) compte.textContent = n === 0 ? libelles.zero : n === 1 ? libelles.un : (libelles.plusieurs || '').replace('{n}', String(n));
       if (aucun) aucun.hidden = n !== 0;
     };
+    // Le type demandé dans l'adresse (liens du menu, par exemple ?type=etude) est présélectionné.
+    const choixType = form.querySelector('[data-filtre="type"]');
+    const demande = new URLSearchParams(window.location.search).get('type');
+    if (choixType && demande && Array.from(choixType.options).some((o) => o.value === demande)) {
+      choixType.value = demande;
+    }
+    const memoriser = () => {
+      const adresse = new URL(window.location.href);
+      const type = lire('type');
+      if (type) adresse.searchParams.set('type', type);
+      else adresse.searchParams.delete('type');
+      window.history.replaceState(null, '', adresse.pathname + adresse.search + adresse.hash);
+    };
     form.addEventListener('input', appliquer);
-    form.addEventListener('change', appliquer);
-    form.addEventListener('reset', () => setTimeout(appliquer, 0));
+    form.addEventListener('change', () => {
+      appliquer();
+      memoriser();
+    });
+    form.addEventListener('reset', () =>
+      setTimeout(() => {
+        appliquer();
+        memoriser();
+      }, 0)
+    );
+    appliquer();
   }
 </script>

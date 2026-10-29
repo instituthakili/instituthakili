@@ -4,7 +4,8 @@ import Intro from '../components/Intro.astro';
 import CarteActualite from '../components/CarteActualite.astro';
 import LigneEvenement from '../components/LigneEvenement.astro';
 import Logo from '../components/Logo.astro';
-import { UI, route } from '../lib/i18n.js';
+import Icone from '../components/Icone.astro';
+import { UI, route, LIBELLES } from '../lib/i18n.js';
 import { contenus, url } from '../lib/content.js';
 
 interface Props { lang: 'fr' | 'en'; cle: string; slug?: string }
@@ -12,6 +13,10 @@ const { lang, cle } = Astro.props;
 const t = UI[lang];
 const c = await contenus();
 const alterne = url(route(cle, lang === 'fr' ? 'en' : 'fr'));
+// Intitulés affichés lorsque la liste est filtrée par catégorie (lien « Articles de presse » du menu).
+const categories = Object.fromEntries(
+  Object.entries(LIBELLES.categoriesActualite).map(([cle, l]: [string, any]) => [cle, cle === 'presse' ? t.rubriques.presse : l[lang] || l.fr])
+);
 const intro = lang === 'fr'
   ? "Parutions, rencontres, restitutions et temps forts de la vie de l’institut, ainsi que l’agenda de ses prochains rendez-vous."
   : "New publications, meetings, presentations of findings and highlights of the Institute’s life, together with its upcoming events.";
@@ -25,15 +30,23 @@ const intro = lang === 'fr'
   />
   <section class="section">
     <div class="conteneur colonnes">
-      <div class="pile" style="gap:28px">
-        <h2 style="font-size:clamp(1.5rem,1.25rem + 1vw,2rem)">{t.actualites}</h2>
+      <div class="pile" style="gap:28px" data-actualites data-categories={JSON.stringify(categories)}>
+        <div class="tete-liste">
+          <h2 style="font-size:clamp(1.5rem,1.25rem + 1vw,2rem)" data-titre-liste>{t.actualites}</h2>
+          <a class="lien-fleche" href={url(route('actualites', lang))} data-toutes hidden>{t.toutesCategories}<Icone nom="fleche-droite" /></a>
+        </div>
         {c.actualites.length > 0 ? (
           <div class="pile" style="gap:36px">
-            {c.actualites.map((a) => <CarteActualite a={a} lang={lang} />)}
+            {c.actualites.map((a) => (
+              <div data-actualite data-categorie={a.data.categorie || 'institut'}>
+                <CarteActualite a={a} lang={lang} />
+              </div>
+            ))}
           </div>
         ) : (
           <p class="vide">{t.aucuneActualite}</p>
         )}
+        <p class="vide" data-aucune-categorie hidden>{t.aucuneActualiteCategorie}</p>
       </div>
       <aside class="colonne-collante" id="agenda">
         <div class="pile" style="gap:8px">
@@ -54,3 +67,26 @@ const intro = lang === 'fr'
     </div>
   </section>
 </Base>
+
+<script>
+  // Filtre par catégorie demandé dans l'adresse, par exemple ?categorie=presse.
+  const zone = document.querySelector('[data-actualites]');
+  const demande = new URLSearchParams(window.location.search).get('categorie');
+  if (zone && demande) {
+    const categories = JSON.parse(zone.getAttribute('data-categories') || '{}');
+    if (categories[demande]) {
+      const cartes = Array.from(zone.querySelectorAll('[data-actualite]'));
+      let n = 0;
+      cartes.forEach((c) => {
+        const ok = c.getAttribute('data-categorie') === demande;
+        c.hidden = !ok;
+        if (ok) n++;
+      });
+      const titre = zone.querySelector('[data-titre-liste]');
+      if (titre) titre.textContent = categories[demande];
+      zone.querySelector('[data-toutes]')?.removeAttribute('hidden');
+      const vide = zone.querySelector('[data-aucune-categorie]');
+      if (vide && cartes.length > 0) vide.hidden = n !== 0;
+    }
+  }
+</script>
