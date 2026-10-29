@@ -1,0 +1,59 @@
+---
+import Base from '../layouts/Base.astro';
+import Intro from '../components/Intro.astro';
+import Portrait from '../components/Portrait.astro';
+import Icone from '../components/Icone.astro';
+import { UI, route } from '../lib/i18n.js';
+import { contenus, url, tr, md, media } from '../lib/content.js';
+import { extrait } from '../lib/format.js';
+
+interface Props { lang: 'fr' | 'en'; cle: string; slug?: string }
+const { lang, cle } = Astro.props;
+const t = UI[lang];
+const c = await contenus();
+const page = c.pages.bienvenue;
+const directeur = c.equipe.find((m) => m.data.groupe === 'direction');
+const alterne = url(route(cle, lang === 'fr' ? 'en' : 'fr'));
+const titre = tr(page, 'titre', lang) || t.motBienvenue;
+const texte = tr(page, 'texte', lang);
+const nom = directeur?.data?.nom || '';
+const fonction = directeur ? tr(directeur.data, 'fonction', lang) : t.directeur;
+const photo = directeur ? media(directeur.data.photo) : '';
+---
+<Base lang={lang} cle={cle} alterne={alterne} titre={titre} description={texte ? extrait(texte.replace(/<[^>]+>/g, ' ').replace(/[*_#>`]/g, ''), 160) : undefined} image={photo || undefined} type="article">
+  <Intro
+    surtitre={t.rubriques.qui}
+    titre={titre}
+    fil={[
+      { libelle: t.nav.accueil, lien: url(route('accueil', lang)) },
+      { libelle: t.rubriques.qui, lien: url(route('institut', lang)) },
+      { libelle: t.nav.bienvenue },
+    ]}
+  />
+  <section class="section">
+    <div class="conteneur mot">
+      {directeur && (
+        <aside class="mot__auteur">
+          <Portrait personne={directeur} lang={lang} chargement="eager" class="mot__portrait" />
+          <div class="mot__identite">
+            <p class="mot__nom">{nom}</p>
+            <p class="mot__fonction">{fonction}</p>
+          </div>
+        </aside>
+      )}
+      <div class="mot__corps">
+        <div class="prose mot__texte" set:html={md(texte)} />
+        {nom && (
+          <p class="mot__signature">
+            <span class="mot__signature-nom">{nom}</span>
+            <span class="mot__signature-fonction">{fonction}</span>
+          </p>
+        )}
+        <div class="mot__liens">
+          <a class="bouton bouton--plein" href={url(route('institut', lang))}>{lang === 'fr' ? 'Découvrir l’institut' : 'Discover the Institute'}<Icone nom="fleche-droite" /></a>
+          <a class="bouton bouton--contour" href={url(route('indices', lang))}>{lang === 'fr' ? 'Les indices HAKILI' : 'The HAKILI indices'}</a>
+        </div>
+      </div>
+    </div>
+  </section>
+</Base>
