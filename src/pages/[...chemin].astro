@@ -16,6 +16,7 @@ import Actualite from '../views/Actualite.astro';
 import Evenement from '../views/Evenement.astro';
 import Contact from '../views/Contact.astro';
 import Mentions from '../views/Mentions.astro';
+import MotDirecteur from '../views/MotDirecteur.astro';
 
 export async function getStaticPaths() {
   const c = await contenus();
@@ -25,7 +26,7 @@ export async function getStaticPaths() {
     pages.push({ params: { chemin: chemin || undefined }, props: { cle, lang, slug } });
   };
   for (const lang of LANGS) {
-    ['accueil', 'institut', 'axes', 'indices', 'publications', 'mediatheque', 'actualites', 'contact', 'mentions'].forEach((k) => ajouter(k, lang));
+    ['accueil', 'bienvenue', 'institut', 'axes', 'indices', 'publications', 'mediatheque', 'actualites', 'contact', 'mentions'].forEach((k) => ajouter(k, lang));
     c.indices.forEach((x) => ajouter('indice', lang, x.slug));
     c.publications.forEach((x) => ajouter('publication', lang, x.slug));
     c.videos.forEach((x) => ajouter('video', lang, x.slug));
@@ -51,6 +52,7 @@ const vues: Record<string, any> = {
   evenement: Evenement,
   contact: Contact,
   mentions: Mentions,
+  bienvenue: MotDirecteur,
 };
 const Vue = vues[cle];
 ---
