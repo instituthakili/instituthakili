@@ -1,15 +1,30 @@
 ---
 import Logo from './Logo.astro';
 import Icone from './Icone.astro';
-import { UI, NAV, route } from '../lib/i18n.js';
-import { url } from '../lib/content.js';
+import { UI, MENU, route } from '../lib/i18n.js';
+import { contenus, url, tr } from '../lib/content.js';
 
 interface Props { lang: 'fr' | 'en'; cle?: string; alterne: string }
 const { lang, cle = '', alterne } = Astro.props;
 const t = UI[lang];
-// Rubrique active : une fiche de publication active « Publications », etc.
-const parent: Record<string, string> = { indice: 'indices', publication: 'publications', video: 'mediatheque', actualite: 'actualites', evenement: 'actualites' };
-const actif = parent[cle] || cle;
+const c = await contenus();
+
+// Adresse d'une entrée du menu, avec son éventuel filtre ou sa partie de page.
+const lien = (e: any) => url(route(e.page, lang)) + (e.requete ? `?${e.requete}` : '') + (e.ancre ? `#${e.ancre}` : '');
+
+const rubriques = MENU.map((m: any, n: number) => {
+  const sous = m.sous === 'indices'
+    ? c.indices.map((i: any) => ({ libelle: tr(i.data, 'nom', lang), lien: url(route('indice', lang, i.slug)) }))
+    : m.sous.map((s: any) => ({ libelle: t.rubriques[s.cle], lien: lien(s) }));
+  return {
+    id: `sous-menu-${n + 1}`,
+    libelle: t.rubriques[m.cle],
+    lien: lien(m),
+    actif: m.pages.includes(cle),
+    courante: m.page === cle,
+    sous,
+  };
+});
 ---
 <header class="entete" data-entete>
   <div class="conteneur entete__barre">
@@ -22,14 +37,28 @@ const actif = parent[cle] || cle;
     </button>
     <nav class="entete__nav" id="navigation" aria-label={t.navPrincipale}>
       <ul class="entete__liens">
-        {NAV.map((c) => (
-          <li>
-            <a href={url(route(c, lang))} aria-current={actif === c && c === cle ? 'page' : undefined} class={actif === c ? 'actif' : undefined}>
-              {t.nav[c]}
-            </a>
+        {rubriques.map((r) => (
+          <li class="entete__rubrique" data-rubrique>
+            <div class="entete__ligne">
+              <a href={r.lien} class={r.actif ? 'actif' : undefined} aria-current={r.courante ? 'page' : undefined}>{r.libelle}</a>
+              {r.sous.length > 0 && (
+                <button class="entete__deplier" type="button" aria-expanded="false" aria-controls={r.id} data-deplier>
+                  <Icone nom="chevron-bas" />
+                  <span class="visuellement-cache">{t.sousRubriques(r.libelle)}</span>
+                </button>
+              )}
+            </div>
+            {r.sous.length > 0 && (
+              <ul class="entete__sous-menu" id={r.id}>
+                {r.sous.map((s: any) => (
+                  <li><a href={s.lien}>{s.libelle}</a></li>
+                ))}
+              </ul>
+            )}
           </li>
         ))}
       </ul>
+      <a class="entete__contact" href={url(route('contact', lang))} aria-current={cle === 'contact' ? 'page' : undefined}>{t.nav.contact}</a>
       <a class="entete__langue" href={alterne} hreflang={lang === 'fr' ? 'en' : 'fr'} lang={lang === 'fr' ? 'en' : 'fr'} aria-label={t.autreLangue}>
         {t.autreLangueCourt}
       </a>
@@ -40,6 +69,32 @@ const actif = parent[cle] || cle;
 <script>
   const entete = document.querySelector('[data-entete]');
   const bouton = document.querySelector('[data-bouton-menu]');
+  const rubriques = Array.from(document.querySelectorAll('[data-rubrique]'));
+
+  const fermerRubriques = (sauf = null) => {
+    rubriques.forEach((r) => {
+      if (r === sauf) return;
+      r.removeAttribute('data-ouvert');
+      r.querySelector('[data-deplier]')?.setAttribute('aria-expanded', 'false');
+    });
+  };
+
+  rubriques.forEach((r) => {
+    const deplier = r.querySelector('[data-deplier]');
+    if (!deplier) return;
+    deplier.addEventListener('click', () => {
+      const ouvert = deplier.getAttribute('aria-expanded') !== 'true';
+      fermerRubriques(r);
+      r.toggleAttribute('data-ouvert', ouvert);
+      deplier.setAttribute('aria-expanded', String(ouvert));
+    });
+  });
+
+  // Un clic hors du menu referme les sous-rubriques ouvertes.
+  document.addEventListener('click', (e) => {
+    if (!(e.target instanceof Element) || !e.target.closest('[data-rubrique]')) fermerRubriques();
+  });
+
   if (entete && bouton) {
     const libelle = bouton.querySelector('[data-libelle-menu]');
     const texteOuvrir = libelle ? libelle.textContent : '';
@@ -48,10 +103,16 @@ const actif = parent[cle] || cle;
       entete.setAttribute('data-ouvert', String(ouvert));
       bouton.setAttribute('aria-expanded', String(ouvert));
       if (libelle) libelle.textContent = ouvert ? texteFermer : texteOuvrir;
+      if (!ouvert) fermerRubriques();
     };
     bouton.addEventListener('click', () => basculer(bouton.getAttribute('aria-expanded') !== 'true'));
     document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape' && bouton.getAttribute('aria-expanded') === 'true') {
+      if (e.key !== 'Escape') return;
+      const ouverte = rubriques.find((r) => r.hasAttribute('data-ouvert'));
+      if (ouverte) {
+        fermerRubriques();
+        ouverte.querySelector('[data-deplier]')?.focus();
+      } else if (bouton.getAttribute('aria-expanded') === 'true') {
         basculer(false);
         bouton.focus();
       }
